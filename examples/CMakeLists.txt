@@ -1,4 +1,6 @@
+# Load the llvm configuration
 find_package(LLVM REQUIRED CONFIG)
+add_definitions(${LLVM_DEFINITIONS})
 
 # Create a list of all example files
 set(EXAMPLEFILES
@@ -11,7 +13,7 @@ foreach(EXFILE ${EXAMPLEFILES})
   # Create a custom build command for each example file
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${EXFILE}.bc"
-    COMMAND clang -c -emit-llvm -g -O0 "${CMAKE_CURRENT_SOURCE_DIR}/${EXFILE}.c"
+    COMMAND "${LLVM_TOOLS_BINARY_DIR}/clang" -c -emit-llvm -g -O0 "${CMAKE_CURRENT_SOURCE_DIR}/${EXFILE}.c"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building ${EXFILE}.bc"
   )

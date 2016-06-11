@@ -1,1 +1,1 @@
-add_library(ListAllFunctions MODULE ListAllFunctions.cpp)
+add_library(ListAllFunctions OBJECT ListAllFunctions.cpp)
