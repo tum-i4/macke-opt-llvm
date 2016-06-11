@@ -1,0 +1,6 @@
+BasedOnStyle: Google
+AllowShortIfStatementsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+MaxEmptyLinesToKeep: 2
