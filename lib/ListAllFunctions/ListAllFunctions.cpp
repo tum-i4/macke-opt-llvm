@@ -3,11 +3,10 @@
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
 
-using namespace llvm;
-
 namespace {
 
-void printAsJsonList(raw_ostream &out, std::list<StringRef> &elements) {
+void printAsJsonList(llvm::raw_ostream &out,
+                     std::list<llvm::StringRef> &elements) {
   // start json list
   out << '[';
 
@@ -38,30 +37,30 @@ void printAsJsonList(raw_ostream &out, std::list<StringRef> &elements) {
 }
 
 
-struct ListAllFunctions : public FunctionPass {
+struct ListAllFunctions : public llvm::FunctionPass {
   static char ID;  // uninitialized ID is needed for pass registration
-  std::list<StringRef> funclist;
+  std::list<llvm::StringRef> funclist;
 
   ListAllFunctions() : FunctionPass(ID) {
     /* empty constructor, just call the parent's one */
   }
 
-  bool doInitialization(Module &M) {
+  bool doInitialization(llvm::Module &M) {
     funclist = {};
     return false;  // nothing was modified in the module
   }
 
-  bool runOnFunction(Function &F) override {
+  bool runOnFunction(llvm::Function &F) override {
     funclist.push_back(F.getName());
     return false;  // nothing was modified in the function
   }
 
-  bool doFinalization(Module &M) {
+  bool doFinalization(llvm::Module &M) {
     // sort the function list alphabetical
     funclist.sort();
 
     // function list as json goes to raw output stream
-    printAsJsonList(outs(), funclist);
+    printAsJsonList(llvm::outs(), funclist);
 
     return false;  // nothing was modified in the module
   }
@@ -71,8 +70,8 @@ struct ListAllFunctions : public FunctionPass {
 
 // Finally register the new pass
 char ListAllFunctions::ID = 0;
-static RegisterPass<ListAllFunctions> X("listallfunctions",
-                                        "List all functions",
-                                        true,  // walks CFG without modifying it
-                                        true   // is only analysis
-                                        );
+static llvm::RegisterPass<ListAllFunctions> X(
+    "listallfunctions", "List all functions",
+    true,  // walks CFG without modifying it
+    true   // is only analysis
+    );
