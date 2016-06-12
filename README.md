@@ -13,7 +13,7 @@ make
 
 ## Example usage
 ```
-opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc
+opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc -o /dev/null
 ```
 
 
