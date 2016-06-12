@@ -20,13 +20,13 @@ void printAsJsonList(llvm::raw_ostream &out,
     }
 
     // some indention for the list elements
-    out << '\n' << "  '";
+    out << '\n' << "  " << '"';
 
     // then write the escaped function name
     out.write_escaped(elem);
 
     // terminate the list entry
-    out << '\'';
+    out << '"';
 
     // Terminate this element with a comma
     first = false;
