@@ -1,6 +1,14 @@
-# Load the llvm configuration
+# Load LLVM with all includes
 find_package(LLVM REQUIRED CONFIG)
 add_definitions(${LLVM_DEFINITIONS})
+
+if(CMAKE_CURRENT_BINARY_DIR)
+    #global include directories
+    include_directories(${BOOST_DIR})
+else()
+    message(STATUS "BOOST_HOME at ${BOOST_DIR}")
+    message(FATAL_ERROR "Undefined BOOST_HOME env var.")
+endif()
 
 # Create a list of all example files
 set(EXAMPLEFILES

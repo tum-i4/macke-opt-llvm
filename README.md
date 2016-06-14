@@ -6,7 +6,7 @@
 ```
 mkdir build
 cd build
-cmake ..
+cmake -DLLVM_DIR="~/build/llvm" ..
 make
 ```
 
@@ -21,3 +21,4 @@ opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc -o /dev/null
 
 * [LLVM-OPT](http://llvm.org/docs/CommandGuide/opt.html)
 * [Tutorial on writing a pass](http://llvm.org/docs/WritingAnLLVMPass.html)
+* [Some details for external packages in cmake](http://wiki.icub.org/wiki/CMake_and_FIND_PACKAGE)
