@@ -8,6 +8,10 @@ int divisible_by_3(int i) {
   return i % 3 == 0;
 }
 
+int divisible_by_4(int i) {
+  return divisible_by_2(i) && divisible_by_2(i / 2);
+}
+
 int divisible_by_5(int i) {
   return i % 5 == 0;
 }
