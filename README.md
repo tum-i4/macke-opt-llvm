@@ -13,7 +13,9 @@ make
 
 ## Example usage
 ```
-opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc -o /dev/null
+opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc -disable-output
+
+opt -load bin/libMackeOpt.so -changeentrypoint bin/greetings.bc -nef french -o bin/mod.bc
 ```
 
 
@@ -22,3 +24,4 @@ opt -load lib/libMackeOpt.so -listallfuncs examples/divisible.bc -o /dev/null
 * [LLVM-OPT](http://llvm.org/docs/CommandGuide/opt.html)
 * [Tutorial on writing a pass](http://llvm.org/docs/WritingAnLLVMPass.html)
 * [Some details for external packages in cmake](http://wiki.icub.org/wiki/CMake_and_FIND_PACKAGE)
+* [Small introduction to LLVM](http://adriansampson.net/blog/llvm.html)
