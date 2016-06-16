@@ -3,6 +3,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/CommandLine.h"
@@ -10,13 +11,13 @@
 
 namespace {
 
-bool hasValidMainType(llvm::Function *Fn) {
+bool hasValidMainType(llvm::Function* Fn) {
   // based on ExecutionEngine::runFunctionAsMain
 
   unsigned NumArgs = Fn->getFunctionType()->getNumParams();
 
-  llvm::FunctionType *FTy = Fn->getFunctionType();
-  llvm::Type *PPInt8Ty =
+  llvm::FunctionType* FTy = Fn->getFunctionType();
+  llvm::Type* PPInt8Ty =
       llvm::Type::getInt8PtrTy(Fn->getContext())->getPointerTo();
 
   if (NumArgs > 3) {
@@ -60,35 +61,56 @@ struct ChangeEntryPoint : public llvm::ModulePass {
     /* empty constructor, just call the parent's one */
   }
 
-  bool runOnModule(llvm::Module &M) {
+  bool runOnModule(llvm::Module& M) {
     // Look for an old main method
-    llvm::Function *oldmain = M.getFunction("main");
+    llvm::Function* oldmain = M.getFunction("main");
 
     if (oldmain != nullptr) {
       // If an old main exist, rename it ...
-      oldmain->setName("main_old");
+      oldmain->setName("__main_old");
     }
 
     // Look for the new entry point function given by the user
-    llvm::Function *newmain = M.getFunction(NewEntryFunction);
+    llvm::Function* newentryfunc = M.getFunction(NewEntryFunction);
 
     // Check if the function given by the user really exists
-    if (newmain == nullptr) {
+    if (newentryfunc == nullptr) {
       llvm::errs() << "Error: " << NewEntryFunction
                    << " is no function inside the module. " << '\n'
                    << "Entry point was not changed!" << '\n';
       return false;
     }
 
-    // TODO check arguments etc. are matching
-    if (!hasValidMainType(newmain)) {
+    // Check, if signature can be used as main function
+    if (!hasValidMainType(newentryfunc)) {
       llvm::errs() << "Error: " << NewEntryFunction
                    << " do not have the signature for a main function." << '\n'
                    << "Entry point was not changed!" << '\n';
     }
 
-    // Everything is fine - just declare the new function as main
-    newmain->setName("main");
+    // Create wrapper function as a new entry function
+    // The new main is has the same signature and attributes as new entry func
+    llvm::Constant* c =
+        M.getOrInsertFunction("main", newentryfunc->getFunctionType());
+    llvm::Function* newmain = llvm::cast<llvm::Function>(c);
+    newmain->setCallingConv(llvm::CallingConv::C);
+    newmain->copyAttributesFrom(newentryfunc);
+
+    // Create a new basic block inside the new main
+    llvm::BasicBlock* block =
+        llvm::BasicBlock::Create(M.getContext(), "", newmain);
+    llvm::IRBuilder<> builder(block);
+
+    // Add a call to the new entry point
+    llvm::Value* ret = builder.CreateCall(newentryfunc);
+
+    // Add return statement if new entry point has one
+    if (newentryfunc->getReturnType() == builder.getVoidTy()) {
+      builder.CreateRetVoid();
+    } else {
+      builder.CreateRet(ret);
+    }
+
     llvm::outs() << "New entry point set to " << NewEntryFunction << '\n';
 
     return true;  // This module was modified
