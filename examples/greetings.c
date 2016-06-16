@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(void) {
+int english(void) {
   puts("Hello World");
   return 0;
 }
@@ -18,4 +18,8 @@ int french(void) {
 int spanish(void) {
   puts("Hola mundo");
   return 0;
+}
+
+int main(void) {
+  return english();
 }

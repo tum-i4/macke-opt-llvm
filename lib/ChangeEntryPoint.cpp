@@ -10,6 +10,45 @@
 
 namespace {
 
+bool hasValidMainType(llvm::Function *Fn) {
+  // based on ExecutionEngine::runFunctionAsMain
+
+  unsigned NumArgs = Fn->getFunctionType()->getNumParams();
+
+  llvm::FunctionType *FTy = Fn->getFunctionType();
+  llvm::Type *PPInt8Ty =
+      llvm::Type::getInt8PtrTy(Fn->getContext())->getPointerTo();
+
+  if (NumArgs > 3) {
+    // Invalid number of arguments of main() supplied
+    return false;
+  }
+
+  if (NumArgs >= 3 && FTy->getParamType(2) != PPInt8Ty) {
+    // Invalid type for third argument of main() supplied
+    return false;
+  }
+
+  if (NumArgs >= 2 && FTy->getParamType(1) != PPInt8Ty) {
+    // Invalid type for second argument of main() supplied
+    return false;
+  }
+
+  if (NumArgs >= 1 && !FTy->getParamType(0)->isIntegerTy(32)) {
+    // Invalid type for first argument of main() supplied
+    return false;
+  }
+
+  if (!FTy->getReturnType()->isIntegerTy() &&
+      !FTy->getReturnType()->isVoidTy()) {
+    // Invalid return type of main() supplied
+    return false;
+  }
+
+  return true;
+}
+
+
 llvm::cl::opt<std::string> NewEntryFunction(
     "nef", llvm::cl::desc("Name of the function used as new entry point"),
     llvm::cl::value_desc("newentryfunction"), llvm::cl::Required);
@@ -22,19 +61,35 @@ struct ChangeEntryPoint : public llvm::ModulePass {
   }
 
   bool runOnModule(llvm::Module &M) {
-    // Generate the callgraph for the given Module
-    llvm::outs() << "Function used as new entry point: " << NewEntryFunction
-                 << '\n';
-
-    // Check that functions exist
-
+    // Look for an old main method
     llvm::Function *oldmain = M.getFunction("main");
+
+    if (oldmain != nullptr) {
+      // If an old main exist, rename it ...
+      oldmain->setName("main_old");
+    }
+
+    // Look for the new entry point function given by the user
     llvm::Function *newmain = M.getFunction(NewEntryFunction);
 
-    // TODO check arguments etc. are matching
+    // Check if the function given by the user really exists
+    if (newmain == nullptr) {
+      llvm::errs() << "Error: " << NewEntryFunction
+                   << " is no function inside the module. " << '\n'
+                   << "Entry point was not changed!" << '\n';
+      return false;
+    }
 
-    newmain->takeName(oldmain);
-    oldmain->setName("oldmain");
+    // TODO check arguments etc. are matching
+    if (!hasValidMainType(newmain)) {
+      llvm::errs() << "Error: " << NewEntryFunction
+                   << " do not have the signature for a main function." << '\n'
+                   << "Entry point was not changed!" << '\n';
+    }
+
+    // Everything is fine - just declare the new function as main
+    newmain->setName("main");
+    llvm::outs() << "New entry point set to " << NewEntryFunction << '\n';
 
     return true;  // This module was modified
   }
