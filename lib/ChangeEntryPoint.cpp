@@ -49,10 +49,10 @@ bool hasValidMainType(llvm::Function* Fn) {
   return true;
 }
 
-
-llvm::cl::opt<std::string> NewEntryFunction(
+static llvm::cl::opt<std::string> NewEntryFunction(
     "nef", llvm::cl::desc("Name of the function used as new entry point"),
-    llvm::cl::value_desc("newentryfunction"), llvm::cl::Required);
+    llvm::cl::value_desc("newentryfunction"));
+
 
 struct ChangeEntryPoint : public llvm::ModulePass {
   static char ID;  // uninitialized ID is needed for pass registration
@@ -68,6 +68,11 @@ struct ChangeEntryPoint : public llvm::ModulePass {
     if (oldmain != nullptr) {
       // If an old main exist, rename it ...
       oldmain->setName("__main_old");
+    }
+
+    if (NewEntryFunction.empty()) {
+      llvm::errs() << "Error: -newentryfunction paramter is needed!" << '\n';
+      return false;
     }
 
     // Look for the new entry point function given by the user
