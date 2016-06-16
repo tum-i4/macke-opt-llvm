@@ -24,8 +24,14 @@ std::string json(const Node &node) {
   // name is the key of the set element
   result += '"' + node.name + '"' + ':';
 
+  // start the internal object
+  result += '{';
+
+  // append number of usages
+  result += "\"#uses\":" + std::to_string(node.uses) + ',';
+
   // start call list
-  result += '[';
+  result += "\"calls\":[";
 
   // small trick for the separating comma
   bool first = true;
@@ -41,6 +47,9 @@ std::string json(const Node &node) {
 
   // close the call list
   result += ']';
+
+  // close the internal object
+  result += '}';
 
   return result;
 }
