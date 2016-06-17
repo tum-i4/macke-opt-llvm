@@ -17,6 +17,10 @@ LLVM_CONFIG_COMMAND = \
 
 all: bin/libMackeOpt.so bin/divisible.bc bin/greetings.bc
 
+.PHONY: test
+test: all
+	@ OPTBIN=$(LLVM_BIN_PATH)/opt python -m unittest
+
 bin/libMackeOpt.so: \
 		bin/ListAllFunctions.o \
 		bin/ExtractCallgraph.o \
