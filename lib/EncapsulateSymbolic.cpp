@@ -2,6 +2,7 @@
 #include <vector>
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/CallGraph.h"
+#include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
@@ -49,13 +50,31 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       oldmain->setName("__main_old");
     }
 
-    // Create the encapsulation
+    // Get builder for the whole module
     llvm::IRBuilder<> modulebuilder(M.getContext());
+    // Datalayout for size calculation
+    llvm::DataLayout datalayout(&M);
+
+    // Create "declare void @klee_make_symbolic(i8*, i32, i8*)"
+    // TODO: Check if works on both 32bit and 64bit
+    llvm::Constant* ck = M.getOrInsertFunction(
+        "klee_make_symbolic",
+        llvm::FunctionType::get(
+            modulebuilder.getVoidTy(),
+            llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
+                modulebuilder.getInt8Ty()->getPointerTo(),
+                datalayout.getIntPtrType(M.getContext()),
+                modulebuilder.getInt8Ty()->getPointerTo()}},
+            false));
+    llvm::Function* kleemakesym = llvm::cast<llvm::Function>(ck);
+    kleemakesym->setCallingConv(llvm::CallingConv::C);
+
+    // Create the encapsulation
 
     // The capsule is "void main()"
-    llvm::Constant* c = M.getOrInsertFunction(
+    llvm::Constant* cm = M.getOrInsertFunction(
         "main", llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
-    llvm::Function* newmain = llvm::cast<llvm::Function>(c);
+    llvm::Function* newmain = llvm::cast<llvm::Function>(cm);
     newmain->setCallingConv(llvm::CallingConv::C);
 
     // Create a new basic block inside the new main
@@ -70,7 +89,18 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       // Allocate new storage
       llvm::AllocaInst* alloc = builder.CreateAlloca(
           argument.getType(), 0, argument.getValueName()->first());
-      // And store the a load to the variable
+
+      // Add a call to make_klee_symbolic for the new variable
+      builder.CreateCall(
+          kleemakesym,
+          llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+              builder.CreateBitCast(alloc, builder.getInt8Ty()->getPointerTo()),
+              // TODO different on 64 bit?
+              builder.getInt32(datalayout.getTypeAllocSize(argument.getType())),
+              builder.CreateGlobalStringPtr(
+                  argument.getValueName()->first())}});
+
+      // And store a load of the variable for latter call
       newargs.push_back(builder.CreateLoad(alloc));
     }
 
