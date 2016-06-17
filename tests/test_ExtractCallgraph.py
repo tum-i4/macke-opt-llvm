@@ -7,10 +7,10 @@ import subprocess
 class TestExtractCallgraph(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, expected):
-        self.assertTrue("OPTBIN" in os.environ, "Path to opt not set")
+        self.assertTrue("LLVMBIN" in os.environ, "Path to llvm-bin not set")
 
         jsonout = subprocess.check_output([
-            os.environ["OPTBIN"],
+            os.environ["LLVMBIN"] + "/opt",
             "-load", "bin/libMackeOpt.so",
             "-extractcallgraph", bitcodefile,
             "-disable-output"])

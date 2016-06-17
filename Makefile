@@ -19,7 +19,7 @@ all: bin/libMackeOpt.so bin/divisible.bc bin/greetings.bc
 
 .PHONY: test
 test: all
-	@ OPTBIN=$(LLVM_BIN_PATH)/opt python -m unittest
+	@ LLVMBIN=$(LLVM_BIN_PATH) python -m unittest
 
 bin/libMackeOpt.so: \
 		bin/ListAllFunctions.o \

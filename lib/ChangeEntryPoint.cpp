@@ -50,8 +50,8 @@ bool hasValidMainType(llvm::Function* Fn) {
 }
 
 static llvm::cl::opt<std::string> NewEntryFunction(
-    "nef", llvm::cl::desc("Name of the function used as new entry point"),
-    llvm::cl::value_desc("newentryfunction"));
+    "newentryfunction",
+    llvm::cl::desc("Name of the function used as new entry point"));
 
 
 struct ChangeEntryPoint : public llvm::ModulePass {
