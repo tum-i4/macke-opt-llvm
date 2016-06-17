@@ -62,14 +62,6 @@ struct ChangeEntryPoint : public llvm::ModulePass {
   }
 
   bool runOnModule(llvm::Module& M) {
-    // Look for an old main method
-    llvm::Function* oldmain = M.getFunction("main");
-
-    if (oldmain != nullptr) {
-      // If an old main exist, rename it ...
-      oldmain->setName("__main_old");
-    }
-
     if (NewEntryFunction.empty()) {
       llvm::errs() << "Error: -newentryfunction paramter is needed!" << '\n';
       return false;
@@ -84,6 +76,14 @@ struct ChangeEntryPoint : public llvm::ModulePass {
                    << " is no function inside the module. " << '\n'
                    << "Entry point was not changed!" << '\n';
       return false;
+    }
+
+    // Look for an old main method
+    llvm::Function* oldmain = M.getFunction("main");
+
+    if (oldmain != nullptr) {
+      // If an old main exist, rename it ...
+      oldmain->setName("__main_old");
     }
 
     // Check, if signature can be used as main function

@@ -15,7 +15,7 @@ LLVM_CONFIG_COMMAND = \
 
 
 
-all: bin/libMackeOpt.so bin/divisible.bc bin/greetings.bc
+all: bin/libMackeOpt.so bin/divisible.bc bin/greetings.bc bin/not42.bc
 
 .PHONY: test
 test: all
@@ -24,7 +24,8 @@ test: all
 bin/libMackeOpt.so: \
 		bin/ListAllFunctions.o \
 		bin/ExtractCallgraph.o \
-		bin/ChangeEntryPoint.o
+		bin/ChangeEntryPoint.o \
+		bin/EncapsulateSymbolic.o
 	$(CXX) $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
 
 
