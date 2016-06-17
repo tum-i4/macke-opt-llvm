@@ -1,5 +1,6 @@
-# This is the only external value to be set
+# These are the only two external values to be set
 LLVM_SRC_PATH ?= $$HOME/build/llvm
+KLEE_BIN_PATH ?= $$HOME/build/klee/Release+Asserts/bin
 
 # Setting some variables and commands for compilaten
 LLVM_BUILD_PATH = $(LLVM_SRC_PATH)/Release
@@ -15,11 +16,12 @@ LLVM_CONFIG_COMMAND = \
 
 
 
-all: bin/libMackeOpt.so bin/divisible.bc bin/greetings.bc bin/not42.bc
+all: bin/libMackeOpt.so \
+	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc
 
 .PHONY: test
 test: all
-	@ LLVMBIN=$(LLVM_BIN_PATH) python -m unittest
+	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest
 
 bin/libMackeOpt.so: \
 		bin/ListAllFunctions.o \

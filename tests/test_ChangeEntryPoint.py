@@ -3,10 +3,10 @@ import os
 import subprocess
 
 
-class TestListAllFunctions(unittest.TestCase):
+class TestChangeEntryPoint(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, new_entrypoint, expected):
-        self.assertTrue("LLVMBIN" in os.environ, "Path to llvm-bin not set")
+        self.assertIn("LLVMBIN", os.environ, "Path to llvm-bin not set")
 
         modfilename = "bin/mod-" + new_entrypoint + ".bc"
 

@@ -7,7 +7,7 @@ import subprocess
 class TestExtractCallgraph(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, expected):
-        self.assertTrue("LLVMBIN" in os.environ, "Path to llvm-bin not set")
+        self.assertIn("LLVMBIN", os.environ, "Path to llvm-bin not set")
 
         jsonout = subprocess.check_output([
             os.environ["LLVMBIN"] + "/opt",
