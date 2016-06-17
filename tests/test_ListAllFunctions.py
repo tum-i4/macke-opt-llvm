@@ -4,7 +4,7 @@ import os
 import subprocess
 
 
-class TestStringMethods(unittest.TestCase):
+class TestListAllFunctions(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, expected):
         self.assertTrue("OPTBIN" in os.environ, "Path to opt not set")
