@@ -1,8 +1,8 @@
 #include <string>
 #include <vector>
+#include "Arch64or32bit.h"
 #include "FunctionDeclarations.h"
 #include "llvm/ADT/SmallVector.h"
-#include "llvm/ADT/Triple.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Function.h"
@@ -83,11 +83,9 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       if (argument.getType()->isPointerTy()) {
         // Allocate new storage
         llvm::Instruction* malloc = builder.CreateCall(
-            mymalloc, (llvm::Triple(M.getTargetTriple()).isArch64Bit())
-                          ? builder.getInt64(datalayout.getTypeAllocSize(
-                                argument.getType()->getPointerElementType()))
-                          : builder.getInt32(datalayout.getTypeAllocSize(
-                                argument.getType()->getPointerElementType())));
+            mymalloc, getInt(datalayout.getTypeAllocSize(
+                                 argument.getType()->getPointerElementType()),
+                             &M, &builder));
 
         // Register the malloc for later call to free
         mallocs.push_back(malloc);
@@ -96,11 +94,9 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         builder.CreateCall(
             kleemakesym,
             llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
-                malloc, (llvm::Triple(M.getTargetTriple()).isArch64Bit())
-                            ? builder.getInt64(datalayout.getTypeAllocSize(
-                                  argument.getType()->getPointerElementType()))
-                            : builder.getInt32(datalayout.getTypeAllocSize(
-                                  argument.getType()->getPointerElementType())),
+                malloc, getInt(datalayout.getTypeAllocSize(
+                                   argument.getType()->getPointerElementType()),
+                               &M, &builder),
                 builder.CreateGlobalStringPtr(
                     argument.getValueName()->first())}});
 
@@ -113,16 +109,14 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
         // Add a call to make_klee_symbolic for the new variable
         builder.CreateCall(
-            kleemakesym, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
-                             builder.CreateBitCast(
-                                 alloc, builder.getInt8Ty()->getPointerTo()),
-                             (llvm::Triple(M.getTargetTriple()).isArch64Bit())
-                                 ? builder.getInt64(datalayout.getTypeAllocSize(
-                                       argument.getType()))
-                                 : builder.getInt32(datalayout.getTypeAllocSize(
-                                       argument.getType())),
-                             builder.CreateGlobalStringPtr(
-                                 argument.getValueName()->first())}});
+            kleemakesym,
+            llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+                builder.CreateBitCast(alloc,
+                                      builder.getInt8Ty()->getPointerTo()),
+                getInt(datalayout.getTypeAllocSize(argument.getType()), &M,
+                       &builder),
+                builder.CreateGlobalStringPtr(
+                    argument.getValueName()->first())}});
 
         // And store a load of the variable for latter call
         newargs.push_back(builder.CreateLoad(alloc));

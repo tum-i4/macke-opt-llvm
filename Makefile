@@ -28,7 +28,8 @@ bin/libMackeOpt.so: \
 		bin/ExtractCallgraph.o \
 		bin/ChangeEntryPoint.o \
 		bin/EncapsulateSymbolic.o \
-		bin/FunctionDeclarations.o
+		bin/FunctionDeclarations.o \
+		bin/Arch64or32bit.o
 	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
 
 

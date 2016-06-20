@@ -1,7 +1,6 @@
 #include "FunctionDeclarations.h"
 #include <vector>
-#include "llvm/ADT/Triple.h"  // TODO shift arch-dependency in own file
-#include "llvm/IR/DataLayout.h"
+#include "Arch64or32bit.h"
 
 // Add "declare void @klee_make_symbolic(i8*, i32, i8*)"
 llvm::Function* declare_klee_make_symbolic(llvm::Module* Mod) {
@@ -13,8 +12,7 @@ llvm::Function* declare_klee_make_symbolic(llvm::Module* Mod) {
       llvm::FunctionType::get(
           modulebuilder.getVoidTy(),
           llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
-              modulebuilder.getInt8Ty()->getPointerTo(),
-              llvm::DataLayout(Mod).getIntPtrType(Mod->getContext()),
+              modulebuilder.getInt8Ty()->getPointerTo(), getIntTy(Mod),
               modulebuilder.getInt8Ty()->getPointerTo()}},
           false));
   llvm::Function* kleemakesym = llvm::cast<llvm::Function>(ck);
@@ -32,11 +30,7 @@ llvm::Function* declare_malloc(llvm::Module* Mod) {
   llvm::Constant* cma = Mod->getOrInsertFunction(
       "malloc", llvm::FunctionType::get(
                     modulebuilder.getInt8Ty()->getPointerTo(),
-                    llvm::ArrayRef<llvm::Type*>{
-                        (llvm::Triple(Mod->getTargetTriple()).isArch64Bit())
-                            ? modulebuilder.getInt64Ty()
-                            : modulebuilder.getInt32Ty()},
-                    false));
+                    llvm::ArrayRef<llvm::Type*>{getIntTy(Mod)}, false));
   llvm::Function* mymalloc = llvm::cast<llvm::Function>(cma);
   mymalloc->setCallingConv(llvm::CallingConv::C);
 
@@ -49,7 +43,7 @@ llvm::Function* declare_free(llvm::Module* Mod) {
   // Create a builder for this module
   llvm::IRBuilder<> modulebuilder(Mod->getContext());
 
-  llvm::Constant* cmf = M.getOrInsertFunction(
+  llvm::Constant* cmf = Mod->getOrInsertFunction(
       "free",
       llvm::FunctionType::get(modulebuilder.getVoidTy(),
                               llvm::ArrayRef<llvm::Type*>{
