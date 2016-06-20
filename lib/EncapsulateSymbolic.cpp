@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include "FunctionDeclarations.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Triple.h"
 #include "llvm/Analysis/CallGraph.h"
@@ -56,39 +57,10 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     // Datalayout for size calculation
     llvm::DataLayout datalayout(&M);
 
-    // Add "declare void @klee_make_symbolic(i8*, i32, i8*)"
-    llvm::Constant* ck = M.getOrInsertFunction(
-        "klee_make_symbolic",
-        llvm::FunctionType::get(
-            modulebuilder.getVoidTy(),
-            llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
-                modulebuilder.getInt8Ty()->getPointerTo(),
-                datalayout.getIntPtrType(M.getContext()),
-                modulebuilder.getInt8Ty()->getPointerTo()}},
-            false));
-    llvm::Function* kleemakesym = llvm::cast<llvm::Function>(ck);
-    kleemakesym->setCallingConv(llvm::CallingConv::C);
-
-    // Add "declare i8* @malloc(i32)"
-    llvm::Constant* cma = M.getOrInsertFunction(
-        "malloc", llvm::FunctionType::get(
-                      modulebuilder.getInt8Ty()->getPointerTo(),
-                      llvm::ArrayRef<llvm::Type*>{
-                          (llvm::Triple(M.getTargetTriple()).isArch64Bit())
-                              ? modulebuilder.getInt64Ty()
-                              : modulebuilder.getInt32Ty()},
-                      false));
-    llvm::Function* mymalloc = llvm::cast<llvm::Function>(cma);
-    mymalloc->setCallingConv(llvm::CallingConv::C);
-
-    // Add "declare void @free(i8*)"
-    llvm::Constant* cmf = M.getOrInsertFunction(
-      "free", llvm::FunctionType::get(
-        modulebuilder.getVoidTy(),
-        llvm::ArrayRef<llvm::Type*>{modulebuilder.getInt8Ty()->getPointerTo()},
-        false));
-    llvm::Function* myfree = llvm::cast<llvm::Function>(cmf);
-    myfree->setCallingConv(llvm::CallingConv::C);
+    // Register relevant functions
+    llvm::Function* kleemakesym = declare_klee_make_symbolic(&M);
+    llvm::Function* mymalloc = declare_malloc(&M);
+    llvm::Function* myfree = declare_free(&M);
 
     // Create the encapsulation
 
