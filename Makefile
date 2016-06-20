@@ -28,11 +28,11 @@ bin/libMackeOpt.so: \
 		bin/ExtractCallgraph.o \
 		bin/ChangeEntryPoint.o \
 		bin/EncapsulateSymbolic.o
-	$(CXX) $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
+	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
 
 
 bin/%.o: lib/%.cpp
-	$(CXX) -c -fPIC $(CXXFLAGS_LLVM) $(LLVM_CONFIG_COMMAND) $^ -o $@
+	$(CXX) -c -fPIC -std=c++11 $(CXXFLAGS_LLVM) $(LLVM_CONFIG_COMMAND) $^ -o $@
 
 
 bin/%.bc: examples/%.c

@@ -78,3 +78,7 @@ class TestListAllFunctions(unittest.TestCase):
         self.run_pass_test(
             "bin/assertions.bc", "simplestring",
             ["ASSERTION FAIL: strcmp(str, greeting) != 0"])
+
+    def test_singlebool(self):
+        self.run_pass_test(
+            "bin/assertions.bc", "singlebool", ["ASSERTION FAIL: a"])

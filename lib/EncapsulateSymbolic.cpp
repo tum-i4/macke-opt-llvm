@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/Triple.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/Function.h"
@@ -56,7 +57,6 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     llvm::DataLayout datalayout(&M);
 
     // Create "declare void @klee_make_symbolic(i8*, i32, i8*)"
-    // TODO: Check if works on both 32bit and 64bit
     llvm::Constant* ck = M.getOrInsertFunction(
         "klee_make_symbolic",
         llvm::FunctionType::get(
@@ -95,8 +95,11 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
           kleemakesym,
           llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
               builder.CreateBitCast(alloc, builder.getInt8Ty()->getPointerTo()),
-              // TODO different on 64 bit?
-              builder.getInt32(datalayout.getTypeAllocSize(argument.getType())),
+              (llvm::Triple(M.getTargetTriple()).isArch64Bit())
+                  ? builder.getInt64(
+                        datalayout.getTypeAllocSize(argument.getType()))
+                  : builder.getInt32(
+                        datalayout.getTypeAllocSize(argument.getType())),
               builder.CreateGlobalStringPtr(
                   argument.getValueName()->first())}});
 

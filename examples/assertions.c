@@ -2,6 +2,7 @@
 // see https://en.wikipedia.org/wiki/C_data_types
 
 #include <assert.h>
+#include <stdbool.h>
 
 
 void singlechar(char c) {
@@ -62,4 +63,6 @@ void simplestring(char *str) {
   assert(strcmp(str, greeting) != 0);
 }
 
-// TODO bool
+void singlebool(bool a) {
+  assert(a);
+}
