@@ -37,3 +37,4 @@ Please run `make format` before your commits
 * [Some details for external packages in cmake](http://wiki.icub.org/wiki/CMake_and_FIND_PACKAGE)
 * [Small introduction to LLVM](http://adriansampson.net/blog/llvm.html)
 * [Hello World with IR-Builder](https://www.ibm.com/developerworks/library/os-createcompilerllvm1/index.html)
+* [More complicated example](http://llvm.org/releases/2.6/docs/tutorial/JITTutorial2.html)

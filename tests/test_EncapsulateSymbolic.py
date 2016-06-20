@@ -64,7 +64,7 @@ class TestListAllFunctions(unittest.TestCase):
 
     def test_singlepointer(self):
         self.run_pass_test(
-            "bin/assertions.bc", "singlepointer", ["ASSERTION FAIL: i"])
+            "bin/assertions.bc", "singlepointer", ["ASSERTION FAIL: *i != 42"])
 
     def test_singlestruct(self):
         self.run_pass_test(

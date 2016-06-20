@@ -37,7 +37,7 @@ void indirect(int i) {
 }
 
 void singlepointer(int *i) {
-  assert(i);
+  assert(*i != 42);
 }
 
 struct mypair {
