@@ -66,3 +66,7 @@ void simplestring(char *str) {
 void singlebool(bool a) {
   assert(a);
 }
+
+void compareints(int a, int b) {
+  assert(a <= b);
+}

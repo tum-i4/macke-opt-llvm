@@ -82,3 +82,7 @@ class TestListAllFunctions(unittest.TestCase):
     def test_singlebool(self):
         self.run_pass_test(
             "bin/assertions.bc", "singlebool", ["ASSERTION FAIL: a"])
+
+    def test_compareints(self):
+        self.run_pass_test(
+            "bin/assertions.bc", "compareints", ["ASSERTION FAIL: a <= b"])
