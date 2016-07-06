@@ -3,7 +3,7 @@ import os
 import subprocess
 
 
-class TestListAllFunctions(unittest.TestCase):
+class TestEncapsulateSymbolic(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, new_entrypoint, assertions):
         self.assertIn("LLVMBIN", os.environ, "Path to llvm-bin not set")

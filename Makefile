@@ -1,6 +1,7 @@
 # These are the only two external values to be set
 LLVM_SRC_PATH ?= $$HOME/build/llvm
 KLEE_BIN_PATH ?= $$HOME/build/klee/Release+Asserts/bin
+KLEE_INLCUDES ?= $$HOME/build/klee/include/
 
 # Setting some variables and commands for compilaten
 LLVM_BUILD_PATH = $(LLVM_SRC_PATH)/Release
@@ -17,7 +18,7 @@ LLVM_CONFIG_COMMAND = \
 
 
 all: bin/libMackeOpt.so \
-	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc
+	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc bin/klee_objsize.bc
 
 .PHONY: test
 test: all
@@ -39,6 +40,9 @@ bin/%.o: lib/%.cpp
 
 bin/%.bc: examples/%.c
 	$(LLVM_BIN_PATH)/clang -c -emit-llvm -O0 -g $^ -o $@
+
+bin/klee_objsize.bc: examples/klee_objsize.c
+	$(LLVM_BIN_PATH)/clang -c -emit-llvm -I$(KLEE_INLCUDES) -O0 -g $^ -o $@
 
 .PHONY: clean
 clean:

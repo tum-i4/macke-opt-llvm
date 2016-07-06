@@ -61,6 +61,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     llvm::Function* kleemakesym = declare_klee_make_symbolic(&M);
     llvm::Function* mymalloc = declare_malloc(&M);
     llvm::Function* myfree = declare_free(&M);
+    llvm::Function* mackeforksizes = define_macke_fork_several_sizes(&M);
+    llvm::Function* kleerange = declare_klee_range(&M);
 
     // Create the encapsulation
 
@@ -81,19 +83,29 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     // For all arguments of the function we want to encapsulate
     for (auto& argument : toencapsulate->getArgumentList()) {
       if (argument.getType()->isPointerTy()) {
-        // Small trick to identify char* attributes
-        // Might be a little dirty, because it might identify int8_t* as well
-        // Sadly there is no char* on bitcode level any more
-        size_t charmodifier =
-            (argument.getType()->getPointerElementType()->isIntegerTy(8)) ? 128
-                                                                          : 1;
+        // Pointers are handled differently
+        // We allocate different sizes of memory and make it symbolic directly
+
+        // int rangecall = klee_range(0, 5, "n");
+        llvm::Instruction* rangecall = builder.CreateCall(
+            kleerange, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+                           getInt(1, &M, &builder), getInt(1025, &M, &builder),
+                           builder.CreateGlobalStringPtr(
+                               "macke_sizeof_" +
+                               argument.getValueName()->first().str())}});
+
+        // int thisrange = macke_fork_several_sizes(rangecall)
+        llvm::Instruction* thisrange =
+            builder.CreateCall(mackeforksizes, rangecall);
+
+        // Calculate the size, that should be allocated
+        llvm::Value* memsize = builder.CreateMul(
+            thisrange, getInt(datalayout.getTypeAllocSize(
+                                  argument.getType()->getPointerElementType()),
+                              &M, &builder));
 
         // Allocate new storage
-        llvm::Instruction* malloc = builder.CreateCall(
-            mymalloc, getInt(datalayout.getTypeAllocSize(
-                                 argument.getType()->getPointerElementType()) *
-                                 charmodifier,
-                             &M, &builder));
+        llvm::Instruction* malloc = builder.CreateCall(mymalloc, memsize);
 
         // Register the malloc for later call to free
         mallocs.push_back(malloc);
@@ -102,13 +114,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         builder.CreateCall(
             kleemakesym,
             llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
-                malloc,
-                getInt(datalayout.getTypeAllocSize(
-                           argument.getType()->getPointerElementType()) *
-                           charmodifier,
-                       &M, &builder),
-                builder.CreateGlobalStringPtr(
-                    argument.getValueName()->first())}});
+                malloc, memsize, builder.CreateGlobalStringPtr(
+                                     argument.getValueName()->first())}});
 
         newargs.push_back(builder.CreateBitCast(malloc, argument.getType()));
 
