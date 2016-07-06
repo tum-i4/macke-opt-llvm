@@ -22,50 +22,61 @@ class TestExtractCallgraph(unittest.TestCase):
             'main': {
                 'calls': ['atoi', 'divisible_by_6',
                           'divisible_by_10', 'divisible_by_30'],
-                '#uses': 1
+                '#uses': 1,
+                'hasdoubleptrattr': True
             },
             'null function': {
                 'calls': [
                     'divisible_by_2', 'llvm.dbg.declare', 'divisible_by_3',
                     'divisible_by_4', 'divisible_by_5', 'divisible_by_6',
                     'divisible_by_10', 'divisible_by_30', 'main', 'atoi'],
-                '#uses': 0
+                '#uses': 0,
+                'hasdoubleptrattr': False
             },
             'divisible_by_2': {
                 'calls': [],
-                '#uses': 5
+                '#uses': 5,
+                'hasdoubleptrattr': False
             },
             'divisible_by_3': {
                 'calls': [],
-                '#uses': 3
+                '#uses': 3,
+                'hasdoubleptrattr': False
             },
             'divisible_by_4': {
                 'calls': ['divisible_by_2', 'divisible_by_2'],
-                '#uses': 1
+                '#uses': 1,
+                'hasdoubleptrattr': False
             },
             'divisible_by_5': {
                 'calls': [],
-                '#uses': 2
+                '#uses': 2,
+                'hasdoubleptrattr': False
             },
             'divisible_by_6': {
                 'calls': ['divisible_by_2', 'divisible_by_3'],
-                '#uses': 2
+                '#uses': 2,
+                'hasdoubleptrattr': False
             },
             'divisible_by_10': {
                 'calls': ['divisible_by_2', 'divisible_by_5'],
-                '#uses': 3
+                '#uses': 3,
+                'hasdoubleptrattr': False
             },
             'divisible_by_30': {
                 'calls': ['divisible_by_3', 'divisible_by_10'],
-                '#uses': 2
+                '#uses': 2,
+                'hasdoubleptrattr': False
             },
             'atoi': {
                 'calls': ['external node'],
-                '#uses': 2
+                '#uses': 2,
+                'hasdoubleptrattr': False
             },
             'llvm.dbg.declare': {
                 'calls': [],
-                '#uses': 1
+                '#uses': 1,
+                'hasdoubleptrattr': False
             }
         }
 
@@ -76,13 +87,20 @@ class TestExtractCallgraph(unittest.TestCase):
             'null function': {
                 'calls': ['english', 'puts', 'german',
                           'french', 'spanish', 'main'],
-                '#uses': 0},
-            'main': {'calls': ['english'], '#uses': 1},
-            'english': {'calls': ['puts'], '#uses': 2},
-            'french': {'calls': ['puts'], '#uses': 1},
-            'german': {'calls': ['puts'], '#uses': 1},
-            'spanish': {'calls': ['puts'], '#uses': 1},
-            'puts': {'calls': ['external node'], '#uses': 5}
+                '#uses': 0, 'hasdoubleptrattr': False},
+            'main': {
+                'calls': ['english'], '#uses': 1, 'hasdoubleptrattr': False},
+            'english': {
+                'calls': ['puts'], '#uses': 2, 'hasdoubleptrattr': False},
+            'french': {
+                'calls': ['puts'], '#uses': 1, 'hasdoubleptrattr': False},
+            'german': {
+                'calls': ['puts'], '#uses': 1, 'hasdoubleptrattr': False},
+            'spanish': {
+                'calls': ['puts'], '#uses': 1, 'hasdoubleptrattr': False},
+            'puts': {
+                'calls': ['external node'],
+                '#uses': 5, 'hasdoubleptrattr': False}
         }
 
         self.run_pass_test("bin/greetings.bc", expected)

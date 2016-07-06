@@ -15,6 +15,7 @@ struct Node {
   std::string name = "";
   uint uses = 0;
   std::list<std::string> calls = {};
+  bool hasdoubleptrattr = false;
 };
 
 std::string json(const Node &node) {
@@ -29,6 +30,11 @@ std::string json(const Node &node) {
 
   // append number of usages
   result += "\"#uses\":" + std::to_string(node.uses) + ',';
+
+  // append information about double pointers
+  result += "\"hasdoubleptrattr\":";
+  result += (node.hasdoubleptrattr) ? "true" : "false";
+  result += ',';
 
   // start call list
   result += "\"calls\":[";
@@ -122,6 +128,14 @@ struct ExtractCallgraph : public llvm::ModulePass {
       // Read the name of the function
       if (llvm::Function *F = cgn->getFunction()) {
         thisnode.name = F->getName();
+
+        for (auto &argument : F->getArgumentList()) {
+          if (argument.getType()->isPointerTy() &&
+              argument.getType()->getPointerElementType()->isPointerTy()) {
+            thisnode.hasdoubleptrattr = true;
+          }
+        }
+
       } else {
         thisnode.name = NULLFUNC;
       }
