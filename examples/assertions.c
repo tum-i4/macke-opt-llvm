@@ -70,3 +70,8 @@ void singlebool(bool a) {
 void compareints(int a, int b) {
   assert(a <= b);
 }
+
+void compareintscomplex(int a, int b) {
+  int n = a * 2;
+  assert(n <= b);
+}
