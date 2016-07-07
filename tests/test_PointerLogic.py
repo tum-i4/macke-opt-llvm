@@ -20,7 +20,8 @@ class TestPointerlogic(unittest.TestCase):
 
         out = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
-            "--optimize", "--only-output-states-covering-new", modfilename],
+            "--optimize", "--only-output-states-covering-new",
+            "--search=nurs:covnew", modfilename],
             stderr=subprocess.STDOUT)
 
         for assertion in assertions:
@@ -33,5 +34,7 @@ class TestPointerlogic(unittest.TestCase):
              "ASSERTION FAIL: (2 * sizeof(int)) != klee_get_obj_size(ptr)",
              "ASSERTION FAIL: (4 * sizeof(int)) != klee_get_obj_size(ptr)",
              "ASSERTION FAIL: (16 * sizeof(int)) != klee_get_obj_size(ptr)",
-             "ASSERTION FAIL: (256 * sizeof(int)) != klee_get_obj_size(ptr)"]
+             "ASSERTION FAIL: (256 * sizeof(int)) != klee_get_obj_size(ptr)",
+             "KLEE: done: completed paths = 5",
+             "KLEE: done: generated tests = 5"]
         )

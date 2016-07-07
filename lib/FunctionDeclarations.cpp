@@ -98,11 +98,11 @@ llvm::Function* declare_free(llvm::Module* Mod) {
 // size_t foo(int n) {
 //     switch(n) {
 //         default:
-//         case 0: return   1; break;
-//         case 1: return   2; break;
-//         case 2: return   4; break;
-//         case 3: return  16; break;
-//         case 4: return 256; break;
+//         case   1: return   1; break;
+//         case   2: return   2; break;
+//         case   4: return   4; break;
+//         case  16: return  16; break;
+//         case 256: return 256; break;
 //     }
 // }
 // Add define "i32 @macke_fork_several_sizes(i32 %n)""
@@ -138,7 +138,7 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
       mackefork->arg_begin(), cases[0], sizeof(sizes) / sizeof(int));
 
   for (int i = 0; i < sizeof(sizes) / sizeof(int); i++) {
-    theswitch->addCase(getInt(i, Mod, &mainbuilder), cases[i]);
+    theswitch->addCase(getInt(sizes[i], Mod, &mainbuilder), cases[i]);
   }
 
   return mackefork;
