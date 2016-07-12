@@ -162,6 +162,6 @@ char EncapsulateSymbolic::ID = 0;
 static llvm::RegisterPass<EncapsulateSymbolic> X(
     "encapsulatesymbolic",
     "Add a new main that calls a function with symbolic arguments",
-    true,  // walks CFG without modifying it
-    true   // is only analysis
+    false,  // walks CFG without modifying it?
+    false   // is only analysis?
     );

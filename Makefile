@@ -18,19 +18,21 @@ LLVM_CONFIG_COMMAND = \
 
 
 all: bin/libMackeOpt.so \
-	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc bin/klee_objsize.bc
+	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc \
+	bin/klee_objsize.bc bin/klee_stacktrace.bc
 
 .PHONY: test
 test: all
 	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest
 
 bin/libMackeOpt.so: \
-		bin/ListAllFunctions.o \
-		bin/ExtractCallgraph.o \
+		bin/Arch64or32bit.o \
 		bin/ChangeEntryPoint.o \
 		bin/EncapsulateSymbolic.o \
+		bin/ExtractCallgraph.o \
 		bin/FunctionDeclarations.o \
-		bin/Arch64or32bit.o
+		bin/ListAllFunctions.o \
+		bin/PrependError.o
 	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
 
 
@@ -41,7 +43,7 @@ bin/%.o: lib/%.cpp
 bin/%.bc: examples/%.c
 	$(LLVM_BIN_PATH)/clang -c -emit-llvm -O0 -g $^ -o $@
 
-bin/klee_objsize.bc: examples/klee_objsize.c
+bin/klee_%.bc: examples/klee_%.c
 	$(LLVM_BIN_PATH)/clang -c -emit-llvm -I$(KLEE_INLCUDES) -O0 -g $^ -o $@
 
 .PHONY: clean
