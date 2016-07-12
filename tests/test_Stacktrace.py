@@ -4,7 +4,7 @@ import re
 import subprocess
 
 
-class TestEncapsulateSymbolic(unittest.TestCase):
+class TestStacktrace(unittest.TestCase):
 
     def run_pass_test(self, bitcodefile, prependtofunction):
         self.assertIn("LLVMBIN", os.environ, "Path to llvm-bin not set")

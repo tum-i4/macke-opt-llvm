@@ -71,7 +71,7 @@ class TestEncapsulateSymbolic(unittest.TestCase):
             "bin/assertions.bc", "singlestruct", [
                 "ASSERTION FAIL: p.i != 21",
                 "ASSERTION FAIL: p.c != 'h'",
-                "ASSERTION FAIL: p.i != 1 && p.c != 'e'"
+                "ASSERTION FAIL: p.i != 1 || p.c != 'e'"
             ])
 
     def test_singlestructpointer(self):
@@ -79,7 +79,7 @@ class TestEncapsulateSymbolic(unittest.TestCase):
             "bin/assertions.bc", "singlestructpointer", [
                 "ASSERTION FAIL: p->i != 21",
                 "ASSERTION FAIL: p->c != 'h'",
-                "ASSERTION FAIL: p->i != 1 && p->c != 'e'"
+                "ASSERTION FAIL: p->i != 1 || p->c != 'e'"
             ])
 
     def test_simplestring(self):

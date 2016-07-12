@@ -48,13 +48,13 @@ struct mypair {
 void singlestruct(struct mypair p) {
   assert(p.i != 21);
   assert(p.c != 'h');
-  assert(p.i != 1 && p.c != 'e');
+  assert(p.i != 1 || p.c != 'e');
 }
 
 void singlestructpointer(struct mypair *p) {
   assert(p->i != 21);
   assert(p->c != 'h');
-  assert(p->i != 1 && p->c != 'e');
+  assert(p->i != 1 || p->c != 'e');
 }
 
 int strcmp(const char *s1, const char *s2) {
