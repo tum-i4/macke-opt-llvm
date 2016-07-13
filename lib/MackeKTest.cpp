@@ -1,10 +1,10 @@
+#include "MackeKTest.h"
 #include <assert.h>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
 #include "klee/Internal/ADT/KTest.h"
-#include "MackeKTest.h"
 
 MackeKTest::MackeKTest(const char* ktestfile) {
   // Test, if everything is readable

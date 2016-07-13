@@ -29,6 +29,7 @@ test: all
 bin/libMackeOpt.so: \
 		bin/Arch64or32bit.o \
 		bin/ChangeEntryPoint.o \
+		bin/DirectoryHelper.o \
 		bin/EncapsulateSymbolic.o \
 		bin/ExtractCallgraph.o \
 		bin/FunctionDeclarations.o \

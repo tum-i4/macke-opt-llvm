@@ -17,6 +17,7 @@ class TestStacktrace(unittest.TestCase):
             "-load", "bin/libMackeOpt.so",
             "-preprenderror", bitcodefile,
             "-prependtofunction", prependtofunction,
+            "-previouskleerundirectory", ".",
             "-o", modfilename])
 
         out = subprocess.check_output(

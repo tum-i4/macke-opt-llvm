@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include "Arch64or32bit.h"
+#include "DirectoryHelper.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
@@ -14,6 +15,9 @@ static llvm::cl::opt<std::string> PrependToFunction(
     "prependtofunction",
     llvm::cl::desc("Name of the function that is prepended with the errors"));
 
+static llvm::cl::opt<std::string> PreviousKleeRunDirectory(
+    "previouskleerundirectory",
+    llvm::cl::desc("klee-out-XX directory of a previous run"));
 
 struct PrependError : public llvm::ModulePass {
   static char ID;  // uninitialized ID is needed for pass registration
@@ -23,8 +27,21 @@ struct PrependError : public llvm::ModulePass {
   }
 
   bool runOnModule(llvm::Module& M) {
+    // Check all the command line arguments
     if (PrependToFunction.empty()) {
       llvm::errs() << "Error: -prependtofunction paramter is needed!" << '\n';
+      return false;
+    }
+
+    if (PreviousKleeRunDirectory.empty()) {
+      llvm::errs() << "Error: -previouskleerundirectory paramter is needed!"
+                   << '\n';
+      return false;
+    }
+
+    if (!is_valid_directory(PreviousKleeRunDirectory.c_str())) {
+      llvm::errs() << "Error: " << PreviousKleeRunDirectory
+                   << " is not a valid directory" << '\n';
       return false;
     }
 

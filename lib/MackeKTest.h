@@ -16,7 +16,8 @@ struct MackeKTestObject {
 };
 
 class MackeKTest {
-  friend std::ostream& operator<<(std::ostream& os, const MackeKTest& mackektest);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const MackeKTest& mackektest);
 
  public:
   std::vector<MackeKTestObject> objects;
