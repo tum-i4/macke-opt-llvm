@@ -73,4 +73,6 @@ std::list<std::string> error_ktests_from_dir(std::string dir) {
        only_ktests_triggering_errors(all_files_in_directory(dir.c_str()))) {
     result.emplace_back(join(dir, elem));
   }
+
+  return result;
 }

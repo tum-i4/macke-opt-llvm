@@ -20,11 +20,12 @@ LLVM_CONFIG_COMMAND = \
 
 all: bin/libMackeOpt.so bin/SimpleKTestTool \
 	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc \
-	bin/klee_objsize.bc bin/klee_stacktrace.bc
+	bin/klee_objsize.bc bin/klee_stacktrace.bc bin/klee_symmain.bc
 
 .PHONY: test
 test: all
 	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest
+#	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest tests.test_PrependError
 
 bin/libMackeOpt.so: \
 		bin/Arch64or32bit.o \

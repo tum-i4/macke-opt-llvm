@@ -1,15 +1,15 @@
 #include "klee/klee.h"
 
 
-int bar() {
+int bar(int n) {
   klee_stack_trace();
-  return 0;
+  return n;
 }
 
-void foo() {
-  bar();
+void foo(int n) {
+  bar(n);
 }
 
 int main(int argc, char** argv) {
-  foo();
+  foo(argc);
 }

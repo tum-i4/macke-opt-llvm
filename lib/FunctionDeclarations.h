@@ -10,6 +10,8 @@ llvm::Function* declare_klee_make_symbolic(llvm::Module* Mod);
 llvm::Function* declare_klee_range(llvm::Module* Mod);
 llvm::Function* declare_malloc(llvm::Module* Mod);
 llvm::Function* declare_free(llvm::Module* Mod);
+llvm::Function* declare_klee_silent_exit(llvm::Module* Mod);
+llvm::Function* declare_klee_report_error(llvm::Module* Mod);
 
 llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod);
 

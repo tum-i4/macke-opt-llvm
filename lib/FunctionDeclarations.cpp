@@ -94,6 +94,54 @@ llvm::Function* declare_free(llvm::Module* Mod) {
 }
 
 
+// Add
+// ; Function Attrs: noreturn
+// declare void @klee_report_error(i8*, i32, i8*, i8*)
+llvm::Function* declare_klee_report_error(llvm::Module* Mod) {
+  // Create a builder for this module
+  llvm::IRBuilder<> modulebuilder(Mod->getContext());
+
+  llvm::Constant* ckre = Mod->getOrInsertFunction(
+      "klee_report_error",
+      llvm::FunctionType::get(
+          modulebuilder.getVoidTy(),
+          llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
+              modulebuilder.getInt8Ty()->getPointerTo(), getIntTy(Mod),
+              modulebuilder.getInt8Ty()->getPointerTo(),
+              modulebuilder.getInt8Ty()->getPointerTo()}},
+          false));
+  llvm::Function* kleereporterror = llvm::cast<llvm::Function>(ckre);
+  kleereporterror->setCallingConv(llvm::CallingConv::C);
+
+  // Add noreturn attribute
+  kleereporterror->addFnAttr(llvm::Attribute::AttrKind::NoReturn);
+
+  return kleereporterror;
+}
+
+
+// Add:
+// ; Function Attrs: noreturn
+// declare void @klee_silent_exit(i32)
+llvm::Function* declare_klee_silent_exit(llvm::Module* Mod) {
+  // Create a builder for this module
+  llvm::IRBuilder<> modulebuilder(Mod->getContext());
+
+  llvm::Constant* cms = Mod->getOrInsertFunction(
+      "klee_silent_exit",
+      llvm::FunctionType::get(modulebuilder.getVoidTy(),
+                              llvm::ArrayRef<llvm::Type*>{getIntTy(Mod)},
+                              false));
+  llvm::Function* mysilent = llvm::cast<llvm::Function>(cms);
+  mysilent->setCallingConv(llvm::CallingConv::C);
+
+  // Add noreturn attribute
+  mysilent->addFnAttr(llvm::Attribute::AttrKind::NoReturn);
+
+  return mysilent;
+}
+
+
 // Create a function equivalent to
 // size_t foo(int n) {
 //     switch(n) {

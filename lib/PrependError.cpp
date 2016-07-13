@@ -1,7 +1,9 @@
+#include <list>
 #include <string>
 #include <vector>
 #include "Arch64or32bit.h"
 #include "DirectoryHelper.h"
+#include "FunctionDeclarations.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
@@ -59,33 +61,94 @@ struct PrependError : public llvm::ModulePass {
     // Get builder for the whole module
     llvm::IRBuilder<> modulebuilder(M.getContext());
 
+    // Register relevant functions
+    llvm::Function* kleeint = declare_klee_int(&M);
+    llvm::Function* kleereporterror = declare_klee_report_error(&M);
+    llvm::Function* kleesilentexit = declare_klee_silent_exit(&M);
+
     // Create the function to be prepended
     llvm::Function* prependedFunc = llvm::Function::Create(
         backgroundFunc->getFunctionType(), backgroundFunc->getLinkage(),
         "__macke_error_" + backgroundFunc->getName(), &M);
+
+    // Give the correct name to all the arguments
+    auto oldarg = backgroundFunc->arg_begin();
+    for (auto& newarg : prependedFunc->getArgumentList()) {
+      newarg.setName(llvm::cast<llvm::Value>(oldarg)->getName());
+      ++oldarg;
+    }
 
     // Create a basic block in the prepended function
     llvm::BasicBlock* block =
         llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
     llvm::IRBuilder<> builder(block);
 
+    // Build symbolic variable to fork later
+    llvm::Instruction* symswitchvar = builder.CreateCall(
+        kleeint, builder.CreateGlobalStringPtr(
+                     "macke_sym_switch_" + backgroundFunc->getName().str()));
+
+    // Create a basic block for the default case
+    llvm::BasicBlock* defaultblock =
+        llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
+    llvm::IRBuilder<> defaultbuilder(defaultblock);
+
     // Replace all calls to the original function with the prepended function
     backgroundFunc->replaceAllUsesWith(prependedFunc);
 
     // Build argument list for the prepended function
     std::vector<llvm::Value*> newargs = {};
-    for (auto& argument : backgroundFunc->getArgumentList()) {
+    for (auto& argument : prependedFunc->getArgumentList()) {
       newargs.push_back(&argument);
     }
 
     // Return the result of a original call to the function
-    llvm::Instruction* origcall = builder.CreateCall(
+    llvm::Instruction* origcall = defaultbuilder.CreateCall(
         backgroundFunc, llvm::ArrayRef<llvm::Value*>(newargs));
 
     if (backgroundFunc->getFunctionType()->getReturnType()->isVoidTy()) {
-      builder.CreateRetVoid();
+      defaultbuilder.CreateRetVoid();
     } else {
-      builder.CreateRet(origcall);
+      defaultbuilder.CreateRet(origcall);
+    }
+
+    // Read all required test date
+    std::list<std::string> ktestlist =
+        error_ktests_from_dir(PreviousKleeRunDirectory);
+
+    // Create the switch statement to fork for each prepended error
+    llvm::SwitchInst* theswitch =
+        builder.CreateSwitch(symswitchvar, defaultblock, ktestlist.size() + 1);
+
+    // One branch statement for each ktest file
+    uint counter = 1;
+    for (auto& ktest : ktestlist) {
+      llvm::BasicBlock* caseblock =
+          llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
+      llvm::IRBuilder<> casebuilder(caseblock);
+
+      // The error reporting if block
+      /*
+      casebuilder.CreateCall(
+          kleereporterror,
+          llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
+              casebuilder.CreateGlobalStringPtr("MACKE"),
+              getInt(0, &M, &casebuilder),
+              casebuilder.CreateGlobalStringPtr("message" +
+                                                std::to_string(counter)),
+              casebuilder.CreateGlobalStringPtr("macke.err"),
+          }));
+      casebuilder.CreateUnreachable();
+      */
+
+      // The no error else block
+      casebuilder.CreateCall(kleesilentexit, llvm::ArrayRef<llvm::Value*>(
+                                                 getInt(0, &M, &casebuilder)));
+      casebuilder.CreateUnreachable();
+
+      // Finally add the case block
+      theswitch->addCase(getInt(counter, &M, &casebuilder), caseblock);
+      counter++;
     }
 
     return true;
