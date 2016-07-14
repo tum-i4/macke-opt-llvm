@@ -42,4 +42,4 @@ class TestPrependError(unittest.TestCase):
             modedbitcodefile],
             stderr=subprocess.STDOUT)
 
-        print(out)
+        print(out.decode("utf-8"))

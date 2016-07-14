@@ -93,6 +93,25 @@ llvm::Function* declare_free(llvm::Module* Mod) {
   return myfree;
 }
 
+// Add "declare i32 @memcmp(i8*, i8*, i32)"
+llvm::Function* declare_memcmp(llvm::Module* Mod) {
+  // Create a builder for this module
+  llvm::IRBuilder<> modulebuilder(Mod->getContext());
+
+  llvm::Constant* cmc = Mod->getOrInsertFunction(
+      "memcmp",
+      llvm::FunctionType::get(
+          getIntTy(Mod),
+          llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
+              modulebuilder.getInt8Ty()->getPointerTo(),
+              modulebuilder.getInt8Ty()->getPointerTo(), getIntTy(Mod)}},
+          false));
+  llvm::Function* mymemcmp = llvm::cast<llvm::Function>(cmc);
+  mymemcmp->setCallingConv(llvm::CallingConv::C);
+
+  return mymemcmp;
+}
+
 
 // Add
 // ; Function Attrs: noreturn
@@ -141,6 +160,23 @@ llvm::Function* declare_klee_silent_exit(llvm::Module* Mod) {
   return mysilent;
 }
 
+
+// Add declare i32 @klee_get_obj_size(i8*)
+llvm::Function* declare_klee_get_obj_size(llvm::Module* Mod) {
+  // Create a builder for this module
+  llvm::IRBuilder<> modulebuilder(Mod->getContext());
+
+  llvm::Constant* cgoz = Mod->getOrInsertFunction(
+      "klee_get_obj_size",
+      llvm::FunctionType::get(getIntTy(Mod),
+                              llvm::ArrayRef<llvm::Type*>{
+                                  modulebuilder.getInt8Ty()->getPointerTo()},
+                              false));
+  llvm::Function* kleegetobjsize = llvm::cast<llvm::Function>(cgoz);
+  kleegetobjsize->setCallingConv(llvm::CallingConv::C);
+
+  return kleegetobjsize;
+}
 
 // Create a function equivalent to
 // size_t foo(int n) {

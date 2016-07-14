@@ -1,9 +1,11 @@
 #include <list>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "Arch64or32bit.h"
 #include "DirectoryHelper.h"
 #include "FunctionDeclarations.h"
+#include "MackeKTest.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
@@ -65,6 +67,8 @@ struct PrependError : public llvm::ModulePass {
     llvm::Function* kleeint = declare_klee_int(&M);
     llvm::Function* kleereporterror = declare_klee_report_error(&M);
     llvm::Function* kleesilentexit = declare_klee_silent_exit(&M);
+    llvm::Function* kleegetobjsize = declare_klee_get_obj_size(&M);
+    llvm::Function* mymemcmp = declare_memcmp(&M);
 
     // Create the function to be prepended
     llvm::Function* prependedFunc = llvm::Function::Create(
@@ -73,8 +77,11 @@ struct PrependError : public llvm::ModulePass {
 
     // Give the correct name to all the arguments
     auto oldarg = backgroundFunc->arg_begin();
+    std::unordered_map<std::string, llvm::Value*> variablemap;
     for (auto& newarg : prependedFunc->getArgumentList()) {
-      newarg.setName(llvm::cast<llvm::Value>(oldarg)->getName());
+      auto oldname = llvm::cast<llvm::Value>(oldarg)->getName();
+      newarg.setName(oldname);
+      variablemap[oldname] = &newarg;
       ++oldarg;
     }
 
@@ -122,29 +129,96 @@ struct PrependError : public llvm::ModulePass {
 
     // One branch statement for each ktest file
     uint counter = 1;
-    for (auto& ktest : ktestlist) {
+    for (auto& ktestfile : ktestlist) {
       llvm::BasicBlock* caseblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> casebuilder(caseblock);
 
+      // The value for checking, if the error occurred
+      llvm::Value* decider = casebuilder.getTrue();
+
+      // Load the date from the corresponding ktest file
+      MackeKTest ktest = MackeKTest(ktestfile.c_str());
+
+      // For each variable defined in the ktest objecct
+      for (auto& kobj : ktest.objects) {
+        // Ignore all variables starting with MACKE
+        if (kobj.name.substr(0, 5) != "MACKE") {
+          // Search for a matching variable in the function
+          auto search = variablemap.find(kobj.name);
+          if (search != variablemap.end()) {
+            llvm::Value* fvalue = search->second;
+            llvm::Value* fvalueptr;
+
+            if (fvalue->getType()->isPointerTy()) {
+              // If it is already a pointer, just keep working with it
+              fvalueptr = fvalue;
+            } else {
+              // If its not a pointer, we add one level of indirection
+              fvalueptr = casebuilder.CreateAlloca(fvalue->getType());
+              casebuilder.CreateStore(fvalue, fvalueptr);
+            }
+
+            // Cast the pointer to void*
+            fvalueptr = casebuilder.CreateBitCast(
+                fvalueptr, builder.getInt8Ty()->getPointerTo());
+
+            // Compare the object size
+            decider = casebuilder.CreateAnd(
+                decider, casebuilder.CreateICmpEQ(
+                             casebuilder.CreateCall(
+                                 kleegetobjsize,
+                                 llvm::ArrayRef<llvm::Value*>(fvalueptr)),
+                             getInt(kobj.value.size(), &M, &casebuilder)));
+
+            // Compare the object content
+            /*
+            decider = casebuilder.CreateAnd(
+                decider,
+                casebuilder.CreateICmpEQ(
+                    casebuilder.CreateCall(
+                        mymemcmp,
+                        llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
+                            fvalueptr, fvalueptr,
+                            getInt(kobj.value.size(), &M, &casebuilder)})),
+                    getInt(0, &M, &casebuilder)));
+            */
+
+          } else {
+            llvm::errs() << "ERROR: KTest variable " << kobj.name
+                         << " not found in function" << '\n';
+            abort();
+          }
+        }
+      }
+
       // The error reporting if block
-      /*
-      casebuilder.CreateCall(
+      llvm::BasicBlock* trueblock =
+          llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
+      llvm::IRBuilder<> truebuilder(trueblock);
+
+      truebuilder.CreateCall(
           kleereporterror,
           llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
-              casebuilder.CreateGlobalStringPtr("MACKE"),
-              getInt(0, &M, &casebuilder),
-              casebuilder.CreateGlobalStringPtr("message" +
-                                                std::to_string(counter)),
-              casebuilder.CreateGlobalStringPtr("macke.err"),
+              truebuilder.CreateGlobalStringPtr("MACKE"),
+              getInt(0, &M, &truebuilder),
+              truebuilder.CreateGlobalStringPtr("Error from " + ktestfile),
+              truebuilder.CreateGlobalStringPtr("macke.err"),
           }));
-      casebuilder.CreateUnreachable();
-      */
+      truebuilder.CreateUnreachable();
 
       // The no error else block
-      casebuilder.CreateCall(kleesilentexit, llvm::ArrayRef<llvm::Value*>(
-                                                 getInt(0, &M, &casebuilder)));
-      casebuilder.CreateUnreachable();
+      llvm::BasicBlock* falseblock =
+          llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
+      llvm::IRBuilder<> falsebuilder(falseblock);
+
+      falsebuilder.CreateCall(
+          kleesilentexit,
+          llvm::ArrayRef<llvm::Value*>(getInt(0, &M, &falsebuilder)));
+      falsebuilder.CreateUnreachable();
+
+      // Add the if the else conditional branch
+      casebuilder.CreateCondBr(decider, trueblock, falseblock);
 
       // Finally add the case block
       theswitch->addCase(getInt(counter, &M, &casebuilder), caseblock);

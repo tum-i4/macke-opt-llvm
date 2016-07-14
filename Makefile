@@ -35,8 +35,9 @@ bin/libMackeOpt.so: \
 		bin/ExtractCallgraph.o \
 		bin/FunctionDeclarations.o \
 		bin/ListAllFunctions.o \
+		bin/MackeKTest.o \
 		bin/PrependError.o
-	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@
+	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@ -L$(KLEE_LIB_PATH) -lkleeBasic
 
 
 bin/%.o: lib/%.cpp
