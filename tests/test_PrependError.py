@@ -42,4 +42,13 @@ class TestPrependError(unittest.TestCase):
             modedbitcodefile],
             stderr=subprocess.STDOUT)
 
-        print(out.decode("utf-8"))
+        self.assertTrue(b"KLEE: done: generated tests = 7" in out)
+        self.assertEqual(6, out.count(b"KLEE: ERROR:"))
+
+        out = subprocess.check_output(
+            [os.environ["KLEEBIN"] + "/ktest-tool"] +
+            ["bin/klee-last/test00000%d.ktest" % i for i in range(1, 8)])
+
+        self.assertEqual(2, out.count(b"\\x15\\x00\\x00\\x00"))
+        self.assertEqual(2, out.count(b"*\\x00\\x00\\x00"))
+        self.assertEqual(2, out.count(b"9\\x05\\x00\\x00"))

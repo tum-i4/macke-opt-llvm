@@ -172,17 +172,16 @@ struct PrependError : public llvm::ModulePass {
                              getInt(kobj.value.size(), &M, &casebuilder)));
 
             // Compare the object content
-            /*
-            decider = casebuilder.CreateAnd(
-                decider,
-                casebuilder.CreateICmpEQ(
-                    casebuilder.CreateCall(
-                        mymemcmp,
-                        llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
-                            fvalueptr, fvalueptr,
-                            getInt(kobj.value.size(), &M, &casebuilder)})),
-                    getInt(0, &M, &casebuilder)));
-            */
+            for (int i = 0; i < kobj.value.size(); i++) {
+              // Get element pointer with the right element offset,
+              // load the memory, and  Compare it
+              decider = casebuilder.CreateAnd(
+                  decider,
+                  casebuilder.CreateICmpEQ(
+                      casebuilder.CreateLoad(
+                          casebuilder.CreateConstGEP1_64(fvalueptr, i)),
+                      casebuilder.getInt8(kobj.value[i])));
+            }
 
           } else {
             llvm::errs() << "ERROR: KTest variable " << kobj.name

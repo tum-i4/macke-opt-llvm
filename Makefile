@@ -25,7 +25,6 @@ all: bin/libMackeOpt.so bin/SimpleKTestTool \
 .PHONY: test
 test: all
 	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest
-#	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest tests.test_PrependError
 
 bin/libMackeOpt.so: \
 		bin/Arch64or32bit.o \

@@ -2,9 +2,9 @@
 #include <assert.h>
 
 void faulty(int a) {
-  assert(a != 1);
   assert(a != 21);
   assert(a != 42);
+  assert(a != 1337);
 }
 
 int main() {
