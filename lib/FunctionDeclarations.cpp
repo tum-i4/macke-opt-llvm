@@ -1,6 +1,7 @@
 #include "FunctionDeclarations.h"
 #include <vector>
 #include "Arch64or32bit.h"
+#include "Constants.h"
 
 
 // Add "declare i32 @klee_int(i8* %name)"
@@ -184,9 +185,7 @@ llvm::Function* declare_klee_get_obj_size(llvm::Module* Mod) {
 //         default:
 //         case   1: return   1; break;
 //         case   2: return   2; break;
-//         case   4: return   4; break;
-//         case  16: return  16; break;
-//         case 256: return 256; break;
+//         ...
 //     }
 // }
 // Add define "i32 @macke_fork_several_sizes(i32 %n)""
@@ -208,21 +207,20 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
   llvm::IRBuilder<> mainbuilder(mainblock);
 
   // Create all blocks inside the case statements
-  const int sizes[] = {1, 2, 4, 16, 256};
-  llvm::BasicBlock* cases[sizeof(sizes) / sizeof(int)];
+  llvm::BasicBlock* cases[ptrforksizes.size()];
 
-  for (int i = 0; i < sizeof(sizes) / sizeof(int); i++) {
+  for (int i = 0; i < ptrforksizes.size(); i++) {
     cases[i] = llvm::BasicBlock::Create(Mod->getContext(), "", mackefork);
     llvm::IRBuilder<> casebuilder(cases[i]);
-    casebuilder.CreateRet(getInt(sizes[i], Mod, &casebuilder));
+    casebuilder.CreateRet(getInt(ptrforksizes[i], Mod, &casebuilder));
   }
 
   // Add all blocks to the switch case statement
   llvm::SwitchInst* theswitch = mainbuilder.CreateSwitch(
-      mackefork->arg_begin(), cases[0], sizeof(sizes) / sizeof(int));
+      mackefork->arg_begin(), cases[0], ptrforksizes.size());
 
-  for (int i = 0; i < sizeof(sizes) / sizeof(int); i++) {
-    theswitch->addCase(getInt(sizes[i], Mod, &mainbuilder), cases[i]);
+  for (int i = 0; i < ptrforksizes.size(); i++) {
+    theswitch->addCase(getInt(ptrforksizes[i], Mod, &mainbuilder), cases[i]);
   }
 
   return mackefork;

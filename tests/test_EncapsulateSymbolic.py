@@ -53,9 +53,9 @@ class TestEncapsulateSymbolic(unittest.TestCase):
     def test_twoints(self):
         self.run_pass_test(
             "bin/assertions.bc", "twoints", [
-                "ASSERTION FAIL: n != 1",
-                "ASSERTION FAIL: i != 0",
-                "ASSERTION FAIL: (n * -1) != i"
+                "ASSERTION FAIL: n != 12",
+                "ASSERTION FAIL: i != 13",
+                "ASSERTION FAIL: (n * -1) != i + 1"
             ])
 
     def test_indirect(self):

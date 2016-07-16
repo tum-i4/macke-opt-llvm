@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 
-void singlechar(char c) {
+void singlechar(unsigned char c) {
   assert(c != 'x');
 }
 
@@ -27,9 +27,9 @@ int withreturn(int i) {
 }
 
 void twoints(unsigned int n, int i) {
-  assert(n != 1);
-  assert(i != 0);
-  assert((n * -1) != i);
+  assert(n != 12);
+  assert(i != 13);
+  assert((n * -1) != i + 1);
 }
 
 void indirect(int i) {
@@ -42,7 +42,7 @@ void singlepointer(int *i) {
 
 struct mypair {
   int i;
-  char c;
+  unsigned char c;
 };
 
 void singlestruct(struct mypair p) {
@@ -65,7 +65,7 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 void simplestring(char *str) {
-  char greeting[] = "Hi";
+  const char greeting[] = "Hi";
   assert(strcmp(str, greeting) != 0);
 }
 

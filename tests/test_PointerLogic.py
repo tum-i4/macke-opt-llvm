@@ -34,7 +34,5 @@ class TestPointerlogic(unittest.TestCase):
              "ASSERTION FAIL: (2 * sizeof(int)) != klee_get_obj_size(ptr)",
              "ASSERTION FAIL: (4 * sizeof(int)) != klee_get_obj_size(ptr)",
              "ASSERTION FAIL: (16 * sizeof(int)) != klee_get_obj_size(ptr)",
-             "ASSERTION FAIL: (256 * sizeof(int)) != klee_get_obj_size(ptr)",
-             "KLEE: done: completed paths = 5",
-             "KLEE: done: generated tests = 5"]
+             "ASSERTION FAIL: (128 * sizeof(int)) != klee_get_obj_size(ptr)"]
         )

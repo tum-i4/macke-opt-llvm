@@ -134,8 +134,15 @@ struct PrependError : public llvm::ModulePass {
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> casebuilder(caseblock);
 
-      // The value for checking, if the error occurred
-      llvm::Value* decider = casebuilder.getTrue();
+      // Block for comparing the error size
+      llvm::BasicBlock* checkcontentblock =
+          llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
+      llvm::IRBuilder<> checkcontentbuilder(checkcontentblock);
+
+      // The value for checking, if the sizes does match
+      llvm::Value* correctsize = casebuilder.getTrue();
+      // The value for checking, if the content does match
+      llvm::Value* correctcontent = casebuilder.getTrue();
 
       // Load the date from the corresponding ktest file
       MackeKTest ktest = MackeKTest(ktestfile.c_str());
@@ -143,7 +150,7 @@ struct PrependError : public llvm::ModulePass {
       // For each variable defined in the ktest objecct
       for (auto& kobj : ktest.objects) {
         // Ignore all variables starting with MACKE
-        if (kobj.name.substr(0, 5) != "MACKE") {
+        if (kobj.name.substr(0, 6) != "macke_") {
           // Search for a matching variable in the function
           auto search = variablemap.find(kobj.name);
           if (search != variablemap.end()) {
@@ -164,23 +171,23 @@ struct PrependError : public llvm::ModulePass {
                 fvalueptr, builder.getInt8Ty()->getPointerTo());
 
             // Compare the object size
-            decider = casebuilder.CreateAnd(
-                decider, casebuilder.CreateICmpEQ(
-                             casebuilder.CreateCall(
-                                 kleegetobjsize,
-                                 llvm::ArrayRef<llvm::Value*>(fvalueptr)),
-                             getInt(kobj.value.size(), &M, &casebuilder)));
+            correctsize = casebuilder.CreateAnd(
+                correctsize, casebuilder.CreateICmpEQ(
+                                 casebuilder.CreateCall(
+                                     kleegetobjsize,
+                                     llvm::ArrayRef<llvm::Value*>(fvalueptr)),
+                                 getInt(kobj.value.size(), &M, &casebuilder)));
 
             // Compare the object content
             for (int i = 0; i < kobj.value.size(); i++) {
               // Get element pointer with the right element offset,
               // load the memory, and  Compare it
-              decider = casebuilder.CreateAnd(
-                  decider,
-                  casebuilder.CreateICmpEQ(
-                      casebuilder.CreateLoad(
-                          casebuilder.CreateConstGEP1_64(fvalueptr, i)),
-                      casebuilder.getInt8(kobj.value[i])));
+              correctcontent = checkcontentbuilder.CreateAnd(
+                  correctcontent,
+                  checkcontentbuilder.CreateICmpEQ(
+                      checkcontentbuilder.CreateLoad(
+                          checkcontentbuilder.CreateConstGEP1_64(fvalueptr, i)),
+                      checkcontentbuilder.getInt8(kobj.value[i])));
             }
 
           } else {
@@ -192,32 +199,34 @@ struct PrependError : public llvm::ModulePass {
       }
 
       // The error reporting if block
-      llvm::BasicBlock* trueblock =
+      llvm::BasicBlock* throwerrblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
-      llvm::IRBuilder<> truebuilder(trueblock);
+      llvm::IRBuilder<> throwerrbuilder(throwerrblock);
 
-      truebuilder.CreateCall(
+      throwerrbuilder.CreateCall(
           kleereporterror,
           llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
-              truebuilder.CreateGlobalStringPtr("MACKE"),
-              getInt(0, &M, &truebuilder),
-              truebuilder.CreateGlobalStringPtr("Error from " + ktestfile),
-              truebuilder.CreateGlobalStringPtr("macke.err"),
+              throwerrbuilder.CreateGlobalStringPtr("MACKE"),
+              getInt(0, &M, &throwerrbuilder),
+              throwerrbuilder.CreateGlobalStringPtr("Error from " + ktestfile),
+              throwerrbuilder.CreateGlobalStringPtr("macke.err"),
           }));
-      truebuilder.CreateUnreachable();
+      throwerrbuilder.CreateUnreachable();
 
       // The no error else block
-      llvm::BasicBlock* falseblock =
+      llvm::BasicBlock* noterrblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
-      llvm::IRBuilder<> falsebuilder(falseblock);
+      llvm::IRBuilder<> noterrbuilder(noterrblock);
 
-      falsebuilder.CreateCall(
+      noterrbuilder.CreateCall(
           kleesilentexit,
-          llvm::ArrayRef<llvm::Value*>(getInt(0, &M, &falsebuilder)));
-      falsebuilder.CreateUnreachable();
+          llvm::ArrayRef<llvm::Value*>(getInt(0, &M, &noterrbuilder)));
+      noterrbuilder.CreateUnreachable();
 
-      // Add the if the else conditional branch
-      casebuilder.CreateCondBr(decider, trueblock, falseblock);
+      // build the branches for size and content check
+      casebuilder.CreateCondBr(correctsize, checkcontentblock, noterrblock);
+      checkcontentbuilder.CreateCondBr(correctcontent, throwerrblock,
+                                       noterrblock);
 
       // Finally add the case block
       theswitch->addCase(getInt(counter, &M, &casebuilder), caseblock);
