@@ -38,6 +38,7 @@ bin/libMackeOpt.so: \
 		bin/EncapsulateSymbolic.o \
 		bin/ExtractCallgraph.o \
 		bin/FunctionDeclarations.o \
+		bin/FunctionDefinitions.o \
 		bin/ListAllFunctions.o \
 		bin/MackeKTest.o \
 		bin/PrependError.o

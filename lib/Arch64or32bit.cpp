@@ -3,6 +3,8 @@
 #include "llvm/ADT/Triple.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+
 
 bool isArch64Bit(llvm::Module* Mod) {
   return llvm::Triple(Mod->getTargetTriple()).isArch64Bit();
@@ -10,18 +12,14 @@ bool isArch64Bit(llvm::Module* Mod) {
 
 
 llvm::Type* getIntTy(llvm::Module* Mod) {
-  llvm::IRBuilder<> modulebuilder(Mod->getContext());
-
-  return (isArch64Bit(Mod)) ? modulebuilder.getInt64Ty()
-                            : modulebuilder.getInt32Ty();
+  return (isArch64Bit(Mod)) ? llvm::Type::getInt64Ty(Mod->getContext())
+                            : llvm::Type::getInt32Ty(Mod->getContext());
 }
 
 
 llvm::Type* getIntTyPtr(llvm::Module* Mod) {
-  llvm::IRBuilder<> modulebuilder(Mod->getContext());
-
-  return (isArch64Bit(Mod)) ? modulebuilder.getInt64Ty()->getPointerTo()
-                            : modulebuilder.getInt32Ty()->getPointerTo();
+  return (isArch64Bit(Mod)) ? llvm::Type::getInt64PtrTy(Mod->getContext())
+                            : llvm::Type::getInt32PtrTy(Mod->getContext());
 }
 
 

@@ -2,6 +2,7 @@
 #include <vector>
 #include "Arch64or32bit.h"
 #include "FunctionDeclarations.h"
+#include "FunctionDefinitions.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/DataLayout.h"
