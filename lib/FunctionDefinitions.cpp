@@ -24,6 +24,12 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
       llvm::FunctionType::get(
           getIntTy(Mod), llvm::ArrayRef<llvm::Type*>{getIntTy(Mod)}, false));
   llvm::Function* mackefork = llvm::cast<llvm::Function>(ck);
+
+  // Check if the function body was alread defined
+  if (mackefork->size() > 0) {
+    return mackefork;
+  }
+
   mackefork->setCallingConv(llvm::CallingConv::C);
 
   // Mark the new function as not inline-able
