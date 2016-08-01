@@ -15,7 +15,8 @@ struct Node {
   std::string name = "";
   uint uses = 0;
   std::list<std::string> calls = {};
-  bool hasdoubleptrattr = false;
+  bool hassingleptrarg = false;
+  bool hasdoubleptrarg = false;
 };
 
 std::string json(const Node &node) {
@@ -31,9 +32,15 @@ std::string json(const Node &node) {
   // append number of usages
   result += "\"#uses\":" + std::to_string(node.uses) + ',';
 
+  // append information about single pointers
+  result += "\"hassingleptrarg\":";
+  result += (node.hassingleptrarg) ? "true" : "false";
+  result += ',';
+
+
   // append information about double pointers
-  result += "\"hasdoubleptrattr\":";
-  result += (node.hasdoubleptrattr) ? "true" : "false";
+  result += "\"hasdoubleptrarg\":";
+  result += (node.hasdoubleptrarg) ? "true" : "false";
   result += ',';
 
   // start call list
@@ -129,10 +136,14 @@ struct ExtractCallgraph : public llvm::ModulePass {
       if (llvm::Function *F = cgn->getFunction()) {
         thisnode.name = F->getName();
 
+        // Extract information about ptr arguments
         for (auto &argument : F->getArgumentList()) {
-          if (argument.getType()->isPointerTy() &&
-              argument.getType()->getPointerElementType()->isPointerTy()) {
-            thisnode.hasdoubleptrattr = true;
+          if (argument.getType()->isPointerTy()) {
+            if (argument.getType()->getPointerElementType()->isPointerTy()) {
+              thisnode.hasdoubleptrarg = true;
+            } else {
+              thisnode.hassingleptrarg = true;
+            }
           }
         }
 
