@@ -26,6 +26,9 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
   llvm::Function* mackefork = llvm::cast<llvm::Function>(ck);
   mackefork->setCallingConv(llvm::CallingConv::C);
 
+  // Mark the new function as not inline-able
+  mackefork->addFnAttr(llvm::Attribute::NoInline);
+
   // Create main block that contains the switch statement
   llvm::BasicBlock* mainblock =
       llvm::BasicBlock::Create(Mod->getContext(), "", mackefork);

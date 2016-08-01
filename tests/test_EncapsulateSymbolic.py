@@ -19,7 +19,9 @@ class TestEncapsulateSymbolic(unittest.TestCase):
             "-o", modfilename])
 
         out = subprocess.check_output(
-            [os.environ["KLEEBIN"] + "/klee", modfilename],
+            [os.environ["KLEEBIN"] + "/klee",
+                "--entry-point=macke_" + new_entrypoint + "_main",
+                modfilename],
             stderr=subprocess.STDOUT)
 
         for assertion in assertions:

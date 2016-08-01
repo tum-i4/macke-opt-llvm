@@ -45,6 +45,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       return false;
     }
 
+    /*
     // Look for an old main method
     llvm::Function* oldmain = M.getFunction("main");
 
@@ -52,6 +53,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       // If an old main exist, rename it ...
       oldmain->setName("__main_old");
     }
+    */
 
     // Get builder for the whole module
     llvm::IRBuilder<> modulebuilder(M.getContext());
@@ -69,9 +71,13 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
     // The capsule is "void main()"
     llvm::Constant* cm = M.getOrInsertFunction(
-        "main", llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
+        "macke_" + EncapsulatedFunction + "_main",
+        llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
     llvm::Function* newmain = llvm::cast<llvm::Function>(cm);
     newmain->setCallingConv(llvm::CallingConv::C);
+
+    // Mark the new main function as not inline-able
+    newmain->addFnAttr(llvm::Attribute::NoInline);
 
     // Create two new basic blocks inside the new main
     llvm::BasicBlock* block =

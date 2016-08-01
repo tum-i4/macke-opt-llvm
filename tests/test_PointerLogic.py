@@ -20,7 +20,10 @@ class TestPointerlogic(unittest.TestCase):
 
         out = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
-            "--optimize", "--only-output-states-covering-new",
+            "--entry-point=macke_" + new_entrypoint + "_main",
+            # Adding "--optimize" to the flags removes all non klee code from
+            # the bitcode file - no idea why - needs further examination
+            "--only-output-states-covering-new",
             "--search=nurs:covnew", modfilename],
             stderr=subprocess.STDOUT)
 
