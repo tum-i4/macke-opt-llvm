@@ -24,19 +24,23 @@ llvm::Function* declare_generic(llvm::Module* Mod, const std::string name,
   return func;
 }
 
-// Add declare i32 @klee_get_obj_size(i8*)
+// Add "declare i64 @klee_get_obj_size(i8*)"
+// 32: "declare i32 @klee_get_obj_size(i8*)"
 llvm::Function* declare_klee_get_obj_size(llvm::Module* Mod) {
   return declare_generic(Mod, "klee_get_obj_size", getIntTy(Mod),
                          {llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
 
 // Add "declare i32 @klee_int(i8* %name)"
+// 32: "declare i32 @klee_int(i8* %name)"
 llvm::Function* declare_klee_int(llvm::Module* Mod) {
-  return declare_generic(Mod, "klee_int", getIntTy(Mod),
+  return declare_generic(Mod, "klee_int",
+                         llvm::Type::getInt32Ty(Mod->getContext()),
                          {llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
 
-// Add "declare void @klee_make_symbolic(i8*, i32, i8*)"
+// Add "declare void @klee_make_symbolic(i8*, i64, i8*)"
+// 32: "declare void @klee_make_symbolic(i8*, i32, i8*)"
 llvm::Function* declare_klee_make_symbolic(llvm::Module* Mod) {
   return declare_generic(
       Mod, "klee_make_symbolic", llvm::Type::getVoidTy(Mod->getContext()),
@@ -45,41 +49,53 @@ llvm::Function* declare_klee_make_symbolic(llvm::Module* Mod) {
 }
 
 // Add "declare i32 @klee_range(i32, i32, i8*)"
+// 32: "declare i32 @klee_range(i32, i32, i8*)"
 llvm::Function* declare_klee_range(llvm::Module* Mod) {
-  return declare_generic(Mod, "klee_range", getIntTy(Mod),
-                         {getIntTy(Mod), getIntTy(Mod),
+  return declare_generic(Mod, "klee_range",
+                         llvm::Type::getInt32Ty(Mod->getContext()),
+                         {llvm::Type::getInt32Ty(Mod->getContext()),
+                          llvm::Type::getInt32Ty(Mod->getContext()),
                           llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
 
-// Add "declare i8* @malloc(i32)"
+// Add "declare noalias i8* @malloc(i64)"
+// 32: "declare noalias i8* @malloc(i32)"
 llvm::Function* declare_malloc(llvm::Module* Mod) {
-  return declare_generic(Mod, "malloc",
-                         llvm::Type::getInt8PtrTy(Mod->getContext()),
-                         {getIntTy(Mod)});
+  llvm::Function* func = declare_generic(
+      Mod, "malloc", llvm::Type::getInt8PtrTy(Mod->getContext()),
+      {getIntTy(Mod)});
+
+  // Add noalias attribute
+  func->setDoesNotAlias(0);
+
+  return func;
 }
 
-
 // Add "declare void @free(i8*)"
+// 32: "declare void @free(i8*)"
 llvm::Function* declare_free(llvm::Module* Mod) {
   return declare_generic(Mod, "free", llvm::Type::getVoidTy(Mod->getContext()),
                          {llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
 
-// Add "declare i32 @memcmp(i8*, i8*, i32)"
+// Add "declare i32 @memcmp(i8*, i8*, i64)"
+// 32: "declare i32 @memcmp(i8*, i8*, i32)"
 llvm::Function* declare_memcmp(llvm::Module* Mod) {
   return declare_generic(
-      Mod, "memcmp", getIntTy(Mod),
+      Mod, "memcmp", llvm::Type::getInt32Ty(Mod->getContext()),
       {llvm::Type::getInt8PtrTy(Mod->getContext()),
        llvm::Type::getInt8PtrTy(Mod->getContext()), getIntTy(Mod)});
 }
 
 // Add
 // ; Function Attrs: noreturn
-// declare void @klee_report_error(i8*, i32, i8*, i8*)
+// 64: "declare void @klee_report_error(i8*, i32, i8*, i8*)"
+// 32: "declare void @klee_report_error(i8*, i32, i8*, i8*)"
 llvm::Function* declare_klee_report_error(llvm::Module* Mod) {
   llvm::Function* func = declare_generic(
       Mod, "klee_report_error", llvm::Type::getVoidTy(Mod->getContext()),
-      {llvm::Type::getInt8PtrTy(Mod->getContext()), getIntTy(Mod),
+      {llvm::Type::getInt8PtrTy(Mod->getContext()),
+       llvm::Type::getInt32Ty(Mod->getContext()),
        llvm::Type::getInt8PtrTy(Mod->getContext()),
        llvm::Type::getInt8PtrTy(Mod->getContext())});
 
@@ -91,11 +107,12 @@ llvm::Function* declare_klee_report_error(llvm::Module* Mod) {
 
 // Add:
 // ; Function Attrs: noreturn
-// declare void @klee_silent_exit(i32)
+// 64: "declare void @klee_silent_exit(i32)"
+// 32: "declare void @klee_silent_exit(i32)"
 llvm::Function* declare_klee_silent_exit(llvm::Module* Mod) {
   llvm::Function* func = declare_generic(
       Mod, "klee_silent_exit", llvm::Type::getVoidTy(Mod->getContext()),
-      {getIntTy(Mod)});
+      {llvm::Type::getInt32Ty(Mod->getContext())});
 
   // Add noreturn attribute
   func->addFnAttr(llvm::Attribute::AttrKind::NoReturn);

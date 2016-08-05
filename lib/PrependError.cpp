@@ -70,7 +70,6 @@ struct PrependError : public llvm::ModulePass {
     llvm::Function* kleereporterror = declare_klee_report_error(&M);
     llvm::Function* kleesilentexit = declare_klee_silent_exit(&M);
     llvm::Function* kleegetobjsize = declare_klee_get_obj_size(&M);
-    llvm::Function* mymemcmp = declare_memcmp(&M);
 
     // Create the function to be prepended
     llvm::Function* prependedFunc = llvm::Function::Create(
@@ -218,7 +217,7 @@ struct PrependError : public llvm::ModulePass {
           kleereporterror,
           llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
               throwerrbuilder.CreateGlobalStringPtr("MACKE"),
-              getInt(0, &M, &throwerrbuilder),
+              throwerrbuilder.getInt32(0),
               throwerrbuilder.CreateGlobalStringPtr("Error from " + ktestfile),
               throwerrbuilder.CreateGlobalStringPtr("macke.err"),
           }));
@@ -229,9 +228,8 @@ struct PrependError : public llvm::ModulePass {
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> noterrbuilder(noterrblock);
 
-      noterrbuilder.CreateCall(
-          kleesilentexit,
-          llvm::ArrayRef<llvm::Value*>(getInt(0, &M, &noterrbuilder)));
+      noterrbuilder.CreateCall(kleesilentexit, llvm::ArrayRef<llvm::Value*>(
+                                                   noterrbuilder.getInt32(0)));
       noterrbuilder.CreateUnreachable();
 
       // build the branches for size and content check
@@ -240,7 +238,7 @@ struct PrependError : public llvm::ModulePass {
                                        noterrblock);
 
       // Finally add the case block
-      theswitch->addCase(getInt(counter, &M, &casebuilder), caseblock);
+      theswitch->addCase(casebuilder.getInt32(counter), caseblock);
       counter++;
     }
 

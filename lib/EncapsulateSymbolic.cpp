@@ -94,7 +94,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         // int rangecall = klee_range(0, 5, "n");
         llvm::Instruction* rangecall = builder.CreateCall(
             kleerange, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
-                           getInt(1, &M, &builder), getInt(1025, &M, &builder),
+                           builder.getInt32(1), builder.getInt32(1025),
                            builder.CreateGlobalStringPtr(
                                "macke_sizeof_" +
                                argument.getValueName()->first().str())}});
@@ -105,9 +105,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
         // Calculate the size, that should be allocated
         llvm::Value* memsize = builder.CreateMul(
-            thisrange, getInt(datalayout.getTypeAllocSize(
-                                  argument.getType()->getPointerElementType()),
-                              &M, &builder));
+            thisrange, builder.getInt32(datalayout.getTypeAllocSize(
+                           argument.getType()->getPointerElementType())));
 
         // Allocate new storage
         llvm::Instruction* malloc = builder.CreateCall(mymalloc, memsize);
