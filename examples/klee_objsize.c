@@ -4,7 +4,7 @@
 
 
 void assert4allSizes(int* ptr) {
-  printf("Memory size: %d\n", klee_get_obj_size(ptr));
+  printf("Memory size: %zu\n", klee_get_obj_size(ptr));
   klee_assert((1 * sizeof(int)) != klee_get_obj_size(ptr));
   klee_assert((2 * sizeof(int)) != klee_get_obj_size(ptr));
   klee_assert((4 * sizeof(int)) != klee_get_obj_size(ptr));

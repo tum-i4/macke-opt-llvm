@@ -25,12 +25,12 @@ all: bin/libMackeOpt.so bin/SimpleKTestTool \
 
 .PHONY: test
 test: all
-	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest
+	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python3 -m unittest
 
 .PHONY: integrationtest
 integrationtest: all
 	@ echo "This takes around 1 minute - just take a small nap^^"
-	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python -m unittest discover -c -p "*.py"
+	@ LLVMBIN=$(LLVM_BIN_PATH) KLEEBIN=$(KLEE_BIN_PATH) python3 -m unittest discover -c -p "*.py"
 
 bin/libMackeOpt.so: \
 		bin/Arch64or32bit.o \
