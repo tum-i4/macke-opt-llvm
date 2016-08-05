@@ -19,7 +19,7 @@ static llvm::cl::opt<std::string> PrependToFunction(
     "prependtofunction",
     llvm::cl::desc("Name of the function that is prepended with the errors"));
 
-static llvm::cl::opt<std::string> PreviousKleeRunDirectory(
+static llvm::cl::list<std::string> PreviousKleeRunDirectory(
     "previouskleerundirectory",
     llvm::cl::desc("klee-out-XX directory of a previous run"));
 
@@ -43,10 +43,12 @@ struct PrependError : public llvm::ModulePass {
       return false;
     }
 
-    if (!is_valid_directory(PreviousKleeRunDirectory.c_str())) {
-      llvm::errs() << "Error: " << PreviousKleeRunDirectory
-                   << " is not a valid directory" << '\n';
-      return false;
+    for (auto& pkrd : PreviousKleeRunDirectory) {
+      if (!is_valid_directory(pkrd.c_str())) {
+        llvm::errs() << "Error: " << pkrd << " is not a valid directory"
+                     << '\n';
+        return false;
+      }
     }
 
     // Look for the function to be encapsulated
@@ -123,8 +125,13 @@ struct PrependError : public llvm::ModulePass {
     }
 
     // Read all required test date
-    std::list<std::string> ktestlist =
-        error_ktests_from_dir(PreviousKleeRunDirectory);
+    std::list<std::string> ktestlist = {};
+    for (auto& pkrd : PreviousKleeRunDirectory) {
+      std::list<std::string> newtests = error_ktests_from_dir(pkrd);
+      for (auto& nt : newtests) {
+        ktestlist.push_back(nt);
+      }
+    }
 
     // Create the switch statement to fork for each prepended error
     llvm::SwitchInst* theswitch =
