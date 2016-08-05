@@ -26,7 +26,7 @@ MackeKTest::MackeKTest(const char* ktestfile) {
   }
 
   // Free memory of primitive klee struct
-  free(ktest);
+  kTest_free(ktest);
 }
 
 
