@@ -84,9 +84,14 @@ class TestIntegration(unittest.TestCase):
         # print(ktests.decode("utf-8"))
 
         for err in duplicatedErrors:
-            self.assertEqual(2, ktests.count(err),
-                             "%s is missing in %s after %s " %
-                             (err, secondkleedir, firstkleedir))
+            if isinstance(err, bytes):
+                self.assertEqual(2, ktests.count(err),
+                                 "%s is missing in %s after %s " %
+                                 (err, secondkleedir, firstkleedir))
+            else:
+                self.assertEqual(2, sum([ktests.count(e) for e in err]),
+                                 "%s is missing in %s after %s " %
+                                 (err, secondkleedir, firstkleedir))
 
     @unittest.skipIf(skipworking, "works")
     def test_int_not42(self):
@@ -136,8 +141,10 @@ class TestIntegration(unittest.TestCase):
     def test_int_singlestruct(self):
         self.batch_run(
             "bin/assertions.bc", "singlestruct", 3 * self.ptrforks, [
-                b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
-                b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
+                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
+                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
+                [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
+                 b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00'"],
                 b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'"
             ])
 
@@ -145,8 +152,10 @@ class TestIntegration(unittest.TestCase):
     def test_int_singlestructpointer(self):
         self.batch_run(
             "bin/assertions.bc", "singlestructpointer", 3 * self.ptrforks, [
-                b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
-                b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
+                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
+                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
+                [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
+                 b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00'"],
                 b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'"
             ])
 
@@ -154,7 +163,7 @@ class TestIntegration(unittest.TestCase):
     def test_int_simplestring(self):
         self.batch_run(
             "bin/assertions.bc", "simplestring", 1 * self.ptrforks,
-            [b"'Hi\\x00\\xff'"])
+            [b"'Hi\\x00'"])
 
     @unittest.skipIf(skipworking, "works")
     def test_int_singlebool(self):
