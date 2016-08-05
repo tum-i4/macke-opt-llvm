@@ -89,6 +89,7 @@ struct PrependError : public llvm::ModulePass {
 
     // Mark the prepended function as not inline-able
     prependedFunc->addFnAttr(llvm::Attribute::NoInline);
+    prependedFunc->addFnAttr(llvm::Attribute::OptimizeNone);
 
     // Create a basic block in the prepended function
     llvm::BasicBlock* block =

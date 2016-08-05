@@ -84,7 +84,9 @@ class TestIntegration(unittest.TestCase):
         # print(ktests.decode("utf-8"))
 
         for err in duplicatedErrors:
-            self.assertEqual(2, ktests.count(err), err + b" is missing")
+            self.assertEqual(2, ktests.count(err),
+                             "%s is missing in %s after %s " %
+                             (err, secondkleedir, firstkleedir))
 
     @unittest.skipIf(skipworking, "works")
     def test_int_not42(self):
@@ -136,7 +138,7 @@ class TestIntegration(unittest.TestCase):
             "bin/assertions.bc", "singlestruct", 3 * self.ptrforks, [
                 b"b'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
                 b"b'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
-                b"b'\\x16\\x01\\x01\\x01h\\xff\\xff\\xff'"
+                b"b'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'"
             ])
 
     @unittest.skipIf(skipworking, "works")

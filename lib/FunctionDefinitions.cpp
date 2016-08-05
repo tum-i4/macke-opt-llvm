@@ -34,6 +34,7 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
 
   // Mark the new function as not inline-able
   mackefork->addFnAttr(llvm::Attribute::NoInline);
+  mackefork->addFnAttr(llvm::Attribute::OptimizeNone);
 
   // Create main block that contains the switch statement
   llvm::BasicBlock* mainblock =
