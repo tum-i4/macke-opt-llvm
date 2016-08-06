@@ -13,7 +13,7 @@
 //         ...
 //     }
 // }
-// Add "define i32 @macke_fork_several_sizes(i32 %n)"
+// Add "define i64 @macke_fork_several_sizes(i32 %n)"
 // 32: "define i32 @macke_fork_several_sizes(i32 %n)"
 llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
   // Create a builder for this module
@@ -22,7 +22,7 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
   // Create function declaration
   llvm::Constant* ck = Mod->getOrInsertFunction(
       "macke_fork_several_sizes",
-      llvm::FunctionType::get(llvm::Type::getInt32Ty(Mod->getContext()),
+      llvm::FunctionType::get(getIntTy(Mod),
                               llvm::ArrayRef<llvm::Type*>{
                                   llvm::Type::getInt32Ty(Mod->getContext())},
                               false));
@@ -50,7 +50,7 @@ llvm::Function* define_macke_fork_several_sizes(llvm::Module* Mod) {
   for (int i = 0; i < ptrforksizes.size(); i++) {
     cases[i] = llvm::BasicBlock::Create(Mod->getContext(), "", mackefork);
     llvm::IRBuilder<> casebuilder(cases[i]);
-    casebuilder.CreateRet(casebuilder.getInt32(ptrforksizes[i]));
+    casebuilder.CreateRet(getInt(ptrforksizes[i], Mod, &casebuilder));
   }
 
   // Add all blocks to the switch case statement

@@ -105,8 +105,9 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
         // Calculate the size, that should be allocated
         llvm::Value* memsize = builder.CreateMul(
-            thisrange, builder.getInt32(datalayout.getTypeAllocSize(
-                           argument.getType()->getPointerElementType())));
+            thisrange, getInt(datalayout.getTypeAllocSize(
+                                  argument.getType()->getPointerElementType()),
+                              &M, &builder));
 
         // Allocate new storage
         llvm::Instruction* malloc = builder.CreateCall(mymalloc, memsize);
