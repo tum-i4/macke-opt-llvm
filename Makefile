@@ -2,7 +2,7 @@
 LLVM_SRC_PATH ?= $$HOME/build/llvm
 KLEE_BIN_PATH ?= $$HOME/build/klee/Release+Asserts/bin
 KLEE_LIB_PATH ?= $$HOME/build/klee/Release+Asserts/lib
-KLEE_INLCUDES ?= $$HOME/build/klee/include/
+KLEE_INCLUDES ?= $$HOME/build/klee/include/
 
 # Setting some variables and commands for compilaten
 LLVM_BUILD_PATH = $(LLVM_SRC_PATH)/Release
@@ -48,7 +48,7 @@ bin/libMackeOpt.so: \
 
 
 bin/%.o: lib/%.cpp
-	$(CXX) -c -fPIC -std=c++11 $(CXXFLAGS_LLVM) $(LLVM_CONFIG_COMMAND) -I$(KLEE_INLCUDES) $^ -o $@
+	$(CXX) -c -fPIC -std=c++11 $(CXXFLAGS_LLVM) $(LLVM_CONFIG_COMMAND) -I$(KLEE_INCLUDES) $^ -o $@
 
 bin/SimpleKTestTool: bin/MackeKTest.o bin/SimpleKTestTool.o
 	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) $^ -o $@ -L$(KLEE_LIB_PATH) -lkleeBasic
@@ -57,7 +57,7 @@ bin/%.bc: examples/%.c
 	$(LLVM_BIN_PATH)/clang -c -emit-llvm -O0 -g $^ -o $@
 
 bin/klee_%.bc: examples/klee_%.c
-	$(LLVM_BIN_PATH)/clang -c -emit-llvm -I$(KLEE_INLCUDES) -O0 -g $^ -o $@
+	$(LLVM_BIN_PATH)/clang -c -emit-llvm -I$(KLEE_INCLUDES) -O0 -g $^ -o $@
 
 .PHONY: clean
 clean:
