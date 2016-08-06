@@ -149,7 +149,8 @@ class TestIntegration(unittest.TestCase):
                  b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
                 [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
                  b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00'"],
-                b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'"
+                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'",
+                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00'"]
             ])
 
     @unittest.skipIf(skipworking, "works")
@@ -160,7 +161,8 @@ class TestIntegration(unittest.TestCase):
                  b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
                 [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
                  b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00'"],
-                b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'"
+                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'",
+                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00'"]
             ])
 
     @unittest.skipIf(skipworking, "works")
