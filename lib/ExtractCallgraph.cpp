@@ -17,6 +17,7 @@ struct Node {
   std::list<std::string> calls = {};
   bool hassingleptrarg = false;
   bool hasdoubleptrarg = false;
+  bool isexternal = true;
 };
 
 std::string json(const Node &node) {
@@ -41,6 +42,11 @@ std::string json(const Node &node) {
   // append information about double pointers
   result += "\"hasdoubleptrarg\":";
   result += (node.hasdoubleptrarg) ? "true" : "false";
+  result += ',';
+
+  // append information about external functions
+  result += "\"isexternal\":";
+  result += (node.isexternal) ? "true" : "false";
   result += ',';
 
   // start call list
@@ -146,6 +152,7 @@ struct ExtractCallgraph : public llvm::ModulePass {
             }
           }
         }
+        thisnode.isexternal = F->empty();
 
       } else {
         thisnode.name = NULLFUNC;
@@ -161,8 +168,6 @@ struct ExtractCallgraph : public llvm::ModulePass {
         // Extract the name of the external node
         if (llvm::Function *FI = I->second->getFunction()) {
           thisnode.calls.push_back(I->second->getFunction()->getName());
-        } else {
-          thisnode.calls.push_back("external node");
         }
       }
 
