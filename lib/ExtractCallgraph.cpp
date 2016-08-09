@@ -1,5 +1,7 @@
 #include <list>
+#include <map>
 #include <string>
+#include <utility>
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/CallGraph.h"
 #include "llvm/IR/Function.h"
@@ -15,6 +17,7 @@ struct Node {
   std::string name = "";
   uint uses = 0;
   std::list<std::string> calls = {};
+  std::list<std::string> calledby = {};
   bool hassingleptrarg = false;
   bool hasdoubleptrarg = false;
   bool isexternal = true;
@@ -65,6 +68,24 @@ std::string json(const Node &node) {
   }
 
   // close the call list
+  result += "],";
+
+  // start called by list
+  result += "\"calledby\":[";
+
+  // small trick for the separating comma
+  first = true;
+
+  for (auto &called : node.calledby) {
+    if (!first) {
+      result += ',';
+    }
+
+    result += '"' + called + '"';
+    first = false;
+  }
+
+  // close the calledby list
   result += ']';
 
   // close the internal object
@@ -130,6 +151,7 @@ struct ExtractCallgraph : public llvm::ModulePass {
     // llvm::outs() << "\n\n\n";
 
     std::list<Node> result = {};
+    std::multimap<std::string, std::string> calledby = {};
 
     for (auto &cgp : cg) {
       // type is std::pair<const llvm::Function*, llvm::CallGraphNode*>
@@ -168,11 +190,28 @@ struct ExtractCallgraph : public llvm::ModulePass {
         // Extract the name of the external node
         if (llvm::Function *FI = I->second->getFunction()) {
           thisnode.calls.push_back(I->second->getFunction()->getName());
+          if (thisnode.name != NULLFUNC) {
+            calledby.insert(std::make_pair(
+              I->second->getFunction()->getName(), thisnode.name));
+          }
         }
       }
+      thisnode.calls.sort();
+      thisnode.calls.unique();
 
       // Store this node in the result
       result.push_back(thisnode);
+    }
+
+    // Add called by information to all function nodes
+    for (auto &r : result) {
+      auto range = calledby.equal_range(r.name);
+      for (auto& c = range.first; c != range.second; ++c) {
+        r.calledby.push_back(c->second);
+      }
+      // Sort the results and remove duplicates
+      r.calledby.sort();
+      r.calledby.unique();
     }
 
     // Print json-representation of the callgraph

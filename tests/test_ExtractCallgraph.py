@@ -20,8 +20,9 @@ class TestExtractCallgraph(unittest.TestCase):
     def test_divisible(self):
         expected = {
             'main': {
-                'calls': ['atoi', 'divisible_by_6',
-                          'divisible_by_10', 'divisible_by_30'],
+                'calls': ['atoi', 'divisible_by_10', 'divisible_by_30',
+                          'divisible_by_6'],
+                'calledby': [],
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': True,
@@ -29,16 +30,19 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'null function': {
                 'calls': [
-                    'divisible_by_2', 'llvm.dbg.declare', 'divisible_by_3',
-                    'divisible_by_4', 'divisible_by_5', 'divisible_by_6',
-                    'divisible_by_10', 'divisible_by_30', 'main', 'atoi'],
+                    'atoi', 'divisible_by_10', 'divisible_by_2',
+                    'divisible_by_3', 'divisible_by_30', 'divisible_by_4',
+                    'divisible_by_5', 'divisible_by_6', 'llvm.dbg.declare',
+                    'main'],
+                'calledby': [],
                 '#uses': 0,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
                 'isexternal': True
             },
             'divisible_by_2': {
-                'calls': [],
+                'calls': [], 'calledby': [
+                    'divisible_by_10', 'divisible_by_4', 'divisible_by_6'],
                 '#uses': 5,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -46,13 +50,15 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'divisible_by_3': {
                 'calls': [],
+                'calledby': ['divisible_by_30', 'divisible_by_6'],
                 '#uses': 3,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
                 'isexternal': False
             },
             'divisible_by_4': {
-                'calls': ['divisible_by_2', 'divisible_by_2'],
+                'calls': ['divisible_by_2'],
+                'calledby': [],
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -60,6 +66,7 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'divisible_by_5': {
                 'calls': [],
+                'calledby': ['divisible_by_10'],
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -67,6 +74,7 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'divisible_by_6': {
                 'calls': ['divisible_by_2', 'divisible_by_3'],
+                'calledby': ['main'],
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -74,13 +82,15 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'divisible_by_10': {
                 'calls': ['divisible_by_2', 'divisible_by_5'],
+                'calledby': ['divisible_by_30', 'main'],
                 '#uses': 3,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
                 'isexternal': False
             },
             'divisible_by_30': {
-                'calls': ['divisible_by_3', 'divisible_by_10'],
+                'calls': ['divisible_by_10', 'divisible_by_3'],
+                'calledby': ['main'],
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -88,6 +98,7 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'atoi': {
                 'calls': [],
+                'calledby': ['main'],
                 '#uses': 2,
                 'hassingleptrarg': True,
                 'hasdoubleptrarg': False,
@@ -95,6 +106,7 @@ class TestExtractCallgraph(unittest.TestCase):
             },
             'llvm.dbg.declare': {
                 'calls': [],
+                'calledby': [],
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
@@ -107,27 +119,34 @@ class TestExtractCallgraph(unittest.TestCase):
     def test_greetings(self):
         expected = {
             'null function': {
-                'calls': ['english', 'puts', 'german',
-                          'french', 'spanish', 'main'], '#uses': 0,
-                'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': True},
+                'calls': ['english', 'french', 'german',
+                          'main', 'puts', 'spanish'], '#uses': 0,
+                'calledby': [], 'hassingleptrarg': False,
+                'hasdoubleptrarg': False, 'isexternal': True},
             'main': {
-                'calls': ['english'], '#uses': 1, 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': False},
+                'calls': ['english'], 'calledby': [], '#uses': 1,
+                'hassingleptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': False},
             'english': {
-                'calls': ['puts'], '#uses': 2, 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': False},
+                'calls': ['puts'], 'calledby': ['main'], '#uses': 2,
+                'hassingleptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': False},
             'french': {
-                'calls': ['puts'], '#uses': 1, 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': False},
+                'calls': ['puts'], 'calledby': [], '#uses': 1,
+                'hassingleptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': False},
             'german': {
-                'calls': ['puts'], '#uses': 1, 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': False},
+                'calls': ['puts'], 'calledby': [], '#uses': 1,
+                'hassingleptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': False},
             'spanish': {
-                'calls': ['puts'], '#uses': 1, 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': False},
+                'calls': ['puts'], 'calledby': [], '#uses': 1,
+                'hassingleptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': False},
             'puts': {
-                'calls': [], '#uses': 5, 'hassingleptrarg': True,
+                'calls': [],
+                'calledby': ['english', 'french', 'german', 'spanish'],
+                '#uses': 5, 'hassingleptrarg': True,
                 'hasdoubleptrarg': False, 'isexternal': True}
         }
 
