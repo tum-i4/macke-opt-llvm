@@ -191,8 +191,8 @@ struct ExtractCallgraph : public llvm::ModulePass {
         if (llvm::Function *FI = I->second->getFunction()) {
           thisnode.calls.push_back(I->second->getFunction()->getName());
           if (thisnode.name != NULLFUNC) {
-            calledby.insert(std::make_pair(
-              I->second->getFunction()->getName(), thisnode.name));
+            calledby.insert(std::make_pair(I->second->getFunction()->getName(),
+                                           thisnode.name));
           }
         }
       }
@@ -206,7 +206,7 @@ struct ExtractCallgraph : public llvm::ModulePass {
     // Add called by information to all function nodes
     for (auto &r : result) {
       auto range = calledby.equal_range(r.name);
-      for (auto& c = range.first; c != range.second; ++c) {
+      for (auto &c = range.first; c != range.second; ++c) {
         r.calledby.push_back(c->second);
       }
       // Sort the results and remove duplicates

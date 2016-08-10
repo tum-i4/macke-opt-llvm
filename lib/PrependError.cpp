@@ -125,21 +125,21 @@ struct PrependError : public llvm::ModulePass {
     }
 
     // Read all required test date
-    std::list<std::string> ktestlist = {};
+    std::list<std::pair<std::string, std::string>> errlist = {};
     for (auto& pkrd : PreviousKleeRunDirectory) {
-      std::list<std::string> newtests = error_ktests_from_dir(pkrd);
+      auto newtests = errors_and_ktests_from_dir(pkrd);
       for (auto& nt : newtests) {
-        ktestlist.push_back(nt);
+        errlist.push_back(nt);
       }
     }
 
     // Create the switch statement to fork for each prepended error
     llvm::SwitchInst* theswitch =
-        builder.CreateSwitch(symswitchvar, defaultblock, ktestlist.size() + 1);
+        builder.CreateSwitch(symswitchvar, defaultblock, errlist.size() + 1);
 
     // One branch statement for each ktest file
     uint counter = 1;
-    for (auto& ktestfile : ktestlist) {
+    for (auto& errfile : errlist) {
       llvm::BasicBlock* caseblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> casebuilder(caseblock);
@@ -155,7 +155,7 @@ struct PrependError : public llvm::ModulePass {
       llvm::Value* correctcontent = casebuilder.getTrue();
 
       // Load the date from the corresponding ktest file
-      MackeKTest ktest = MackeKTest(ktestfile.c_str());
+      MackeKTest ktest = MackeKTest(errfile.second.c_str());
 
       // For each variable defined in the ktest objecct
       for (auto& kobj : ktest.objects) {
@@ -218,7 +218,7 @@ struct PrependError : public llvm::ModulePass {
           llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
               throwerrbuilder.CreateGlobalStringPtr("MACKE"),
               throwerrbuilder.getInt32(0),
-              throwerrbuilder.CreateGlobalStringPtr("Error from " + ktestfile),
+              throwerrbuilder.CreateGlobalStringPtr("Error from " + errfile.first),
               throwerrbuilder.CreateGlobalStringPtr("macke.err"),
           }));
       throwerrbuilder.CreateUnreachable();

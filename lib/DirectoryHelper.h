@@ -28,13 +28,14 @@ std::string join(std::string directory, std::string filename);
 * Filters list of filenames and only returns .ktest files with a corresponding
 * error report file
 */
-std::list<std::string> only_ktests_triggering_errors(
+std::list<std::pair<std::string, std::string>> only_ktests_triggering_errors(
     std::list<std::string> filelist);
 
 
 /**
-* Lists all ktest files with a corresponding error report file from a directory
+* Lists all pairs of error with corresponding ktest file from a directory
 */
-std::list<std::string> error_ktests_from_dir(std::string dir);
+std::list<std::pair<std::string, std::string>> errors_and_ktests_from_dir(
+    std::string dir);
 
 #endif  // LIB_DIRECTORYHELPER_H_

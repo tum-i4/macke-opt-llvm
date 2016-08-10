@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <utility>
 
 
 bool is_valid_directory(const char* dir) {
@@ -48,9 +49,9 @@ std::string join(std::string directory, std::string filename) {
 }
 
 
-std::list<std::string> only_ktests_triggering_errors(
+std::list<std::pair<std::string, std::string>> only_ktests_triggering_errors(
     std::list<std::string> filelist) {
-  std::list<std::string> result = {};
+  std::list<std::pair<std::string, std::string>> result = {};
 
   const std::string ending = ".err";
 
@@ -59,19 +60,20 @@ std::list<std::string> only_ktests_triggering_errors(
         (0 ==
          elem.compare(elem.length() - ending.length(), ending.length(),
                       ending))) {
-      result.emplace_back(corresponding_ktest(elem));
+      result.emplace_back(make_pair(elem, corresponding_ktest(elem)));
     }
   }
   return result;
 }
 
-
-std::list<std::string> error_ktests_from_dir(std::string dir) {
-  std::list<std::string> result = {};
+std::list<std::pair<std::string, std::string>> errors_and_ktests_from_dir(
+    std::string dir) {
+  std::list<std::pair<std::string, std::string>> result = {};
 
   for (auto& elem :
        only_ktests_triggering_errors(all_files_in_directory(dir.c_str()))) {
-    result.emplace_back(join(dir, elem));
+    result.emplace_back(
+        make_pair(join(dir, elem.first), join(dir, elem.second)));
   }
 
   return result;
