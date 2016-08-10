@@ -45,14 +45,6 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       return false;
     }
 
-    // Look for an old main method
-    llvm::Function* oldmain = M.getFunction("main");
-
-    if (oldmain != nullptr) {
-      // If an old main exist, rename it ...
-      oldmain->setName("__main_old");
-    }
-
     // Get builder for the whole module
     llvm::IRBuilder<> modulebuilder(M.getContext());
     // Datalayout for size calculation
@@ -69,7 +61,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
     // The capsule is "void main()"
     llvm::Constant* cm = M.getOrInsertFunction(
-        "main", llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
+        "macke_" + EncapsulatedFunction + "_main",
+        llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
     llvm::Function* newmain = llvm::cast<llvm::Function>(cm);
     newmain->setCallingConv(llvm::CallingConv::C);
 

@@ -18,10 +18,12 @@ class TestPointerlogic(unittest.TestCase):
             "-encapsulatedfunction", new_entrypoint,
             "-o", modfilename])
 
+        # --disable-internalize can be removed, if KLEE fixes bug #454
         out = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
             "--only-output-states-covering-new", "--optimize",
-            "--search=nurs:covnew", modfilename],
+            "--entry-point", "macke_%s_main" % new_entrypoint,
+            "--disable-internalize", "--search=nurs:covnew", modfilename],
             stderr=subprocess.STDOUT)
 
         for assertion in assertions:

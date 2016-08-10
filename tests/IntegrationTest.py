@@ -27,10 +27,12 @@ class TestIntegration(unittest.TestCase):
             "-o", symencfile])
 
         # then pass the new file to KLEE
+        # --disable-internalize can be removed, if KLEE fixes bug #454
         firstklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
             "--optimize", "--emit-all-errors",
-            "--only-output-states-covering-new",
+            "--entry-point", "macke_%s_main" % analyzedfunction,
+            "--disable-internalize", "--only-output-states-covering-new",
             symencfile],
             stderr=subprocess.STDOUT)
 
@@ -57,10 +59,12 @@ class TestIntegration(unittest.TestCase):
             "-o", prependedfile])
 
         # And finally run KLEE again with prepended errors
+        # --disable-internalize can be removed, if KLEE fixes bug #454
         secondklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
             "--optimize", "--emit-all-errors",
-            "--only-output-states-covering-new",
+            "--entry-point", "macke_%s_main" % analyzedfunction,
+            "--disable-internalize", "--only-output-states-covering-new",
             prependedfile],
             stderr=subprocess.STDOUT)
 

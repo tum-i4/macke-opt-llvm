@@ -18,8 +18,11 @@ class TestEncapsulateSymbolic(unittest.TestCase):
             "-encapsulatedfunction", new_entrypoint,
             "-o", modfilename])
 
+        # --disable-internalize can be removed, if KLEE fixes bug #454
         out = subprocess.check_output(
-            [os.environ["KLEEBIN"] + "/klee", modfilename],
+            [os.environ["KLEEBIN"] + "/klee", "--optimize",
+             "--disable-internalize", "--entry-point",
+             "macke_%s_main" % new_entrypoint, modfilename],
             stderr=subprocess.STDOUT)
 
         for assertion in assertions:
