@@ -218,7 +218,8 @@ struct PrependError : public llvm::ModulePass {
           llvm::ArrayRef<llvm::Value*>(std::vector<llvm::Value*>{
               throwerrbuilder.CreateGlobalStringPtr("MACKE"),
               throwerrbuilder.getInt32(0),
-              throwerrbuilder.CreateGlobalStringPtr("Error from " + errfile.first),
+              throwerrbuilder.CreateGlobalStringPtr("ERROR FROM " +
+                                                    errfile.first),
               throwerrbuilder.CreateGlobalStringPtr("macke.err"),
           }));
       throwerrbuilder.CreateUnreachable();
