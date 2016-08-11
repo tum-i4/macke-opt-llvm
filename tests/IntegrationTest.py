@@ -31,6 +31,7 @@ class TestIntegration(unittest.TestCase):
         firstklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
             "--optimize", "--emit-all-errors",
+            "--libc=uclibc", "--posix-runtime",
             "--entry-point", "macke_%s_main" % analyzedfunction,
             "--disable-internalize", "--only-output-states-covering-new",
             symencfile],
@@ -45,7 +46,7 @@ class TestIntegration(unittest.TestCase):
 
         # Find the directory with all error test cases
         firstkleedir = re.search(
-            r"^KLEE: output directory is \"(.*)\"",
+            r"KLEE: output directory is \"(.*)\"",
             firstklee.decode("utf-8")).group(1)
 
         # Then prepend all errors to the function
@@ -63,6 +64,7 @@ class TestIntegration(unittest.TestCase):
         secondklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
             "--optimize", "--emit-all-errors",
+            "--libc=uclibc", "--posix-runtime",
             "--entry-point", "macke_%s_main" % analyzedfunction,
             "--disable-internalize", "--only-output-states-covering-new",
             prependedfile],
@@ -72,7 +74,7 @@ class TestIntegration(unittest.TestCase):
 
         # Find the directory with the newly generated testcases
         secondkleedir = re.search(
-            r"^KLEE: output directory is \"(.*)\"",
+            r"KLEE: output directory is \"(.*)\"",
             secondklee.decode("utf-8")).group(1)
 
         # Count the generated testcases

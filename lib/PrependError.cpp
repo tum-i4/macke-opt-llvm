@@ -159,8 +159,10 @@ struct PrependError : public llvm::ModulePass {
 
       // For each variable defined in the ktest objecct
       for (auto& kobj : ktest.objects) {
-        // Ignore all variables starting with MACKE
-        if (kobj.name.substr(0, 6) != "macke_") {
+        // Ignore all variables starting with MACKE and
+        //  model_version from posix environment
+        if (kobj.name.substr(0, 6) != "macke_" and
+            kobj.name != "model_version") {
           // Search for a matching variable in the function
           auto search = variablemap.find(kobj.name);
           if (search != variablemap.end()) {

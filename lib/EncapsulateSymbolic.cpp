@@ -62,7 +62,12 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     // The capsule is "void main()"
     llvm::Constant* cm = M.getOrInsertFunction(
         "macke_" + EncapsulatedFunction + "_main",
-        llvm::FunctionType::get(modulebuilder.getVoidTy(), false));
+        llvm::FunctionType::get(
+            getIntTy(&M),
+            llvm::ArrayRef<llvm::Type*>{std::vector<llvm::Type*>{
+                getIntTy(&M),
+                llvm::Type::getInt8PtrTy(M.getContext())->getPointerTo()}},
+            false));
     llvm::Function* newmain = llvm::cast<llvm::Function>(cm);
     newmain->setCallingConv(llvm::CallingConv::C);
 
@@ -146,8 +151,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
       builder.CreateCall(myfree, malloc);
     }
 
-    // The new main has void return type
-    builder.CreateRetVoid();
+    // The new main returns always zero
+    builder.CreateRet(getInt(0, &M, &builder));
 
     return true;  // This module was modified
   }
