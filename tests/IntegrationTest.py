@@ -30,8 +30,7 @@ class TestIntegration(unittest.TestCase):
         # --disable-internalize can be removed, if KLEE fixes bug #454
         firstklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
-            "--optimize", "--emit-all-errors",
-            "--libc=uclibc", "--posix-runtime",
+            "--optimize", "--libc=uclibc", "--posix-runtime",
             "--entry-point", "macke_%s_main" % analyzedfunction,
             "--disable-internalize", "--only-output-states-covering-new",
             symencfile],
@@ -63,14 +62,11 @@ class TestIntegration(unittest.TestCase):
         # --disable-internalize can be removed, if KLEE fixes bug #454
         secondklee = subprocess.check_output([
             os.environ["KLEEBIN"] + "/klee",
-            "--optimize", "--emit-all-errors",
-            "--libc=uclibc", "--posix-runtime",
+            "--optimize", "--libc=uclibc", "--posix-runtime",
             "--entry-point", "macke_%s_main" % analyzedfunction,
             "--disable-internalize", "--only-output-states-covering-new",
             prependedfile],
             stderr=subprocess.STDOUT)
-
-        # print(secondklee.decode("utf-8"))
 
         # Find the directory with the newly generated testcases
         secondkleedir = re.search(
@@ -174,8 +170,8 @@ class TestIntegration(unittest.TestCase):
     @unittest.skipIf(skipworking, "works")
     def test_int_simplestring(self):
         self.batch_run(
-            "bin/assertions.bc", "simplestring", 1,
-            [b"'Hi\\x00'"])
+            "bin/assertions.bc", "simplestring", 2,
+            [b"'H'", b"'Hi\\x00"])
 
     @unittest.skipIf(skipworking, "works")
     def test_int_singlebool(self):
