@@ -1,13 +1,14 @@
-# These are the only two external values to be set
+# These are the only three external values to be set
 LLVM_SRC_PATH ?= $$HOME/build/llvm
-KLEE_BIN_PATH ?= $$HOME/build/klee/Release+Asserts/bin
-KLEE_LIB_PATH ?= $$HOME/build/klee/Release+Asserts/lib
+KLEE_BUILDDIR ?= $$HOME/build/klee/Release+Asserts
 KLEE_INCLUDES ?= $$HOME/build/klee/include/
 
 # Setting some variables and commands for compilaten
 LLVM_BUILD_PATH = $(LLVM_SRC_PATH)/Release
 LLVM_BIN_PATH = $(LLVM_BUILD_PATH)/bin
 LLVM_INCLUDES = -I$(LLVM_SRC_PATH)/include -I$(LLVM_BUILD_PATH)/include
+KLEE_BIN_PATH = $(KLEE_BUILDDIR)/bin
+KLEE_LIB_PATH = $(KLEE_BUILDDIR)/lib
 
 CXX = g++
 CXXFLAGS_LLVM = -fno-rtti -O3 $(LLVM_INCLUDES)
