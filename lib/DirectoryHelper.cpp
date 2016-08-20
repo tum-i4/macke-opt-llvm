@@ -13,6 +13,17 @@ bool is_valid_directory(const char* dir) {
 }
 
 
+bool hasEnding(std::string const& fullString, std::string const& ending) {
+  if (fullString.length() >= ending.length()) {
+    return (0 ==
+            fullString.compare(fullString.length() - ending.length(),
+                               ending.length(), ending));
+  } else {
+    return false;
+  }
+}
+
+
 std::list<std::string> all_files_in_directory(const char* dir) {
   // Prepare the memory for the results
   std::list<std::string> result = {};
@@ -53,13 +64,10 @@ std::list<std::pair<std::string, std::string>> only_ktests_triggering_errors(
     std::list<std::string> filelist) {
   std::list<std::pair<std::string, std::string>> result = {};
 
-  const std::string ending = ".err";
-
   for (auto& elem : filelist) {
-    if (elem.length() > ending.length() &&
-        (0 ==
-         elem.compare(elem.length() - ending.length(), ending.length(),
-                      ending))) {
+    if (hasEnding(elem, "ptr.err") || hasEnding(elem, "free.err") ||
+        hasEnding(elem, "assert.err") || hasEnding(elem, "div.err") ||
+        hasEnding(elem, "macke.err")) {
       result.emplace_back(make_pair(elem, corresponding_ktest(elem)));
     }
   }
