@@ -26,6 +26,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': True,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'null function': {
@@ -38,6 +39,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 0,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': True
             },
             'divisible_by_2': {
@@ -46,6 +48,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 5,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_3': {
@@ -54,6 +57,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 3,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_4': {
@@ -62,6 +66,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_5': {
@@ -70,6 +75,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_6': {
@@ -78,6 +84,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_10': {
@@ -86,6 +93,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 3,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'divisible_by_30': {
@@ -94,6 +102,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 2,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': False
             },
             'atoi': {
@@ -102,6 +111,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 2,
                 'hassingleptrarg': True,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': True
             },
             'llvm.dbg.declare': {
@@ -110,6 +120,7 @@ class TestExtractCallgraph(unittest.TestCase):
                 '#uses': 1,
                 'hassingleptrarg': False,
                 'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
                 'isexternal': True
             }
         }
@@ -122,32 +133,58 @@ class TestExtractCallgraph(unittest.TestCase):
                 'calls': ['english', 'french', 'german',
                           'main', 'puts', 'spanish'], '#uses': 0,
                 'calledby': [], 'hassingleptrarg': False,
-                'hasdoubleptrarg': False, 'isexternal': True},
+                'hasdoubleptrarg': False, 'hasfuncptrarg': False,
+                'isexternal': True},
             'main': {
                 'calls': ['english'], 'calledby': [], '#uses': 1,
                 'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': False},
+                'hasfuncptrarg': False, 'isexternal': False},
             'english': {
                 'calls': ['puts'], 'calledby': ['main'], '#uses': 2,
                 'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': False},
+                'hasfuncptrarg': False, 'isexternal': False},
             'french': {
                 'calls': ['puts'], 'calledby': [], '#uses': 1,
                 'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': False},
+                'hasfuncptrarg': False, 'isexternal': False},
             'german': {
                 'calls': ['puts'], 'calledby': [], '#uses': 1,
                 'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': False},
+                'hasfuncptrarg': False, 'isexternal': False},
             'spanish': {
                 'calls': ['puts'], 'calledby': [], '#uses': 1,
                 'hassingleptrarg': False, 'hasdoubleptrarg': False,
-                'isexternal': False},
+                'hasfuncptrarg': False, 'isexternal': False},
             'puts': {
                 'calls': [],
                 'calledby': ['english', 'french', 'german', 'spanish'],
                 '#uses': 5, 'hassingleptrarg': True,
-                'hasdoubleptrarg': False, 'isexternal': True}
+                'hasfuncptrarg': False, 'hasdoubleptrarg': False,
+                'isexternal': True}
         }
 
         self.run_pass_test("bin/greetings.bc", expected)
+
+    def test_funcpointer(self):
+        expected = {
+            'null function': {
+                'calls': ['function', 'llvm.dbg.declare'], '#uses': 0,
+                'calledby': [], 'hassingleptrarg': False,
+                'hasdoubleptrarg': False, 'hasfuncptrarg': False,
+                'isexternal': True},
+            'function': {
+                'calls': [], 'calledby': [], '#uses': 1,
+                'hassingleptrarg': True, 'hasdoubleptrarg': False,
+                'hasfuncptrarg': True, 'isexternal': False},
+            'llvm.dbg.declare': {
+                'calls': [],
+                'calledby': [],
+                '#uses': 1,
+                'hassingleptrarg': False,
+                'hasdoubleptrarg': False,
+                'hasfuncptrarg': False,
+                'isexternal': True
+            }
+        }
+
+        self.run_pass_test("bin/funcptr.bc", expected)

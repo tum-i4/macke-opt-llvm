@@ -20,6 +20,7 @@ struct Node {
   std::list<std::string> calledby = {};
   bool hassingleptrarg = false;
   bool hasdoubleptrarg = false;
+  bool hasfuncptrarg = false;
   bool isexternal = true;
 };
 
@@ -45,6 +46,11 @@ std::string json(const Node &node) {
   // append information about double pointers
   result += "\"hasdoubleptrarg\":";
   result += (node.hasdoubleptrarg) ? "true" : "false";
+  result += ',';
+
+  // append information about function pointer arguments
+  result += "\"hasfuncptrarg\":";
+  result += (node.hasfuncptrarg) ? "true" : "false";
   result += ',';
 
   // append information about external functions
@@ -171,6 +177,9 @@ struct ExtractCallgraph : public llvm::ModulePass {
               thisnode.hasdoubleptrarg = true;
             } else {
               thisnode.hassingleptrarg = true;
+            }
+            if (argument.getType()->getPointerElementType()->isFunctionTy()) {
+              thisnode.hasfuncptrarg = true;
             }
           }
         }

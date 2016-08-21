@@ -22,7 +22,7 @@ LLVM_CONFIG_COMMAND = \
 all: bin/libMackeOpt.so bin/SimpleKTestTool \
 	bin/divisible.bc bin/greetings.bc bin/not42.bc bin/assertions.bc \
 	bin/klee_objsize.bc bin/klee_stacktrace.bc bin/klee_symmain.bc \
-	bin/doomcircle.bc
+	bin/doomcircle.bc bin/funcptr.bc
 
 .PHONY: test
 test: all
