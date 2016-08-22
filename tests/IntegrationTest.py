@@ -147,31 +147,31 @@ class TestIntegration(unittest.TestCase):
     def test_int_singlestruct(self):
         self.batch_run(
             "bin/assertions.bc", "singlestruct", 3, [
-                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
-                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
-                [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff'",
-                 b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00'"],
-                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'",
-                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00'"]
+                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff",
+                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00"],
+                [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff",
+                 b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00"],
+                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00",
+                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00"]
             ])
 
     @unittest.skipIf(skipworking, "works")
     def test_int_singlestructpointer(self):
         self.batch_run(
             "bin/assertions.bc", "singlestructpointer", 3, [
-                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff'",
-                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00'"],
+                [b"'\\x01\\x00\\x00\\x00e\\xff\\xff\\xff",
+                 b"'\\x01\\x00\\x00\\x00e\\x00\\x00\\x00"],
                 [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff",
                  b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00"],
-                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00'",
-                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00'"]
+                [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00",
+                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00"]
             ])
 
     @unittest.skipIf(skipworking, "works")
     def test_int_simplestring(self):
         self.batch_run(
             "bin/assertions.bc", "simplestring", 2,
-            [b"'H'", b"'Hi\\x00"])
+            [b"'Hi\\x00"])
 
     @unittest.skipIf(skipworking, "works")
     def test_int_singlebool(self):
