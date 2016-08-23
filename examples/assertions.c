@@ -81,3 +81,7 @@ void compareintscomplex(int a, int b) {
   int n = a * 2;
   assert(n <= b);
 }
+
+void twopointers(unsigned char* a, unsigned char* b) {
+  assert(!(a[0] == 'A' && b[0] == 'B'));
+}

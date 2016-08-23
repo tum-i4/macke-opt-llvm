@@ -176,3 +176,7 @@ class TestIntegration(unittest.TestCase):
     @unittest.skipIf(skipworking, "works")
     def test_int_singlebool(self):
         self.batch_run("bin/assertions.bc", "singlebool", 1, [b"'\\x00'"])
+
+    @unittest.skipIf(skipworking, "works")
+    def test_two_pointers(self):
+        self.batch_run("bin/assertions.bc", "twopointers", 1, [b"'B"])
