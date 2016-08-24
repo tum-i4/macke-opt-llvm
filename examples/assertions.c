@@ -82,6 +82,6 @@ void compareintscomplex(int a, int b) {
   assert(n <= b);
 }
 
-void twopointers(unsigned char* a, unsigned char* b) {
+void twopointers(unsigned char *a, unsigned char *b) {
   assert(!(a[0] == 'A' && b[0] == 'B'));
 }
