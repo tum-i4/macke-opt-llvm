@@ -39,6 +39,7 @@ bin/libMackeOpt.so: \
 		bin/DirectoryHelper.o \
 		bin/EncapsulateSymbolic.o \
 		bin/ExtractCallgraph.o \
+		bin/ExtractLinesOfCode.o \
 		bin/FunctionDeclarations.o \
 		bin/FunctionDefinitions.o \
 		bin/ListAllFunctions.o \
