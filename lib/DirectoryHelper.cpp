@@ -1,6 +1,7 @@
 #include "DirectoryHelper.h"
 #include <dirent.h>
 #include <sys/stat.h>
+#include <fstream>
 #include <iostream>
 #include <list>
 #include <string>
@@ -10,6 +11,12 @@
 bool is_valid_directory(const char* dir) {
   struct stat stbuf;
   return stat(dir, &stbuf) == 0 && S_ISDIR(stbuf.st_mode);
+}
+
+
+bool is_valid_file(const char* file) {
+  std::ifstream ifs(file);
+  return ifs.good();
 }
 
 

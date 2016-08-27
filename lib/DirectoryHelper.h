@@ -10,6 +10,16 @@
 bool is_valid_directory(const char* dir);
 
 /**
+ * Checks, if file exists and is readable
+ */
+bool is_valid_file(const char* file);
+
+/**
+ * Check, if fullString ends with ending
+ */
+bool hasEnding(std::string const& fullString, std::string const& ending);
+
+/**
 * Get a list of all files inside a directory
 */
 std::list<std::string> all_files_in_directory(const char* dir);

@@ -1,6 +1,7 @@
 #include <list>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include "Arch64or32bit.h"
 #include "DirectoryHelper.h"
@@ -23,6 +24,10 @@ static llvm::cl::list<std::string> PreviousKleeRunDirectory(
     "previouskleerundirectory",
     llvm::cl::desc("klee-out-XX directory of a previous run"));
 
+static llvm::cl::list<std::string> ErrorFileToPrepend(
+    "errorfiletoprepend",
+    llvm::cl::desc("klee .err file, that should be prepended"));
+
 struct PrependError : public llvm::ModulePass {
   static char ID;  // uninitialized ID is needed for pass registration
 
@@ -37,15 +42,23 @@ struct PrependError : public llvm::ModulePass {
       return false;
     }
 
-    if (PreviousKleeRunDirectory.empty()) {
-      llvm::errs() << "Error: -previouskleerundirectory paramter is needed!"
-                   << '\n';
+    if (PreviousKleeRunDirectory.empty() && ErrorFileToPrepend.empty()) {
+      llvm::errs() << "Error: -previouskleerundirectory paramter or "
+                   << " -errorfiletoprepend parameter is needed!" << '\n';
       return false;
     }
 
     for (auto& pkrd : PreviousKleeRunDirectory) {
       if (!is_valid_directory(pkrd.c_str())) {
         llvm::errs() << "Error: " << pkrd << " is not a valid directory"
+                     << '\n';
+        return false;
+      }
+    }
+
+    for (auto& eftp : ErrorFileToPrepend) {
+      if (!hasEnding(eftp.c_str(), ".err") || !is_valid_file(eftp.c_str())) {
+        llvm::errs() << "Error: " << eftp << " is not a valid .err-file"
                      << '\n';
         return false;
       }
@@ -127,13 +140,26 @@ struct PrependError : public llvm::ModulePass {
       defaultbuilder.CreateRet(origcall);
     }
 
-    // Read all required test date
+    // Read all required test data
     std::list<std::pair<std::string, std::string>> errlist = {};
+
+    // From complete directories
     for (auto& pkrd : PreviousKleeRunDirectory) {
       auto newtests = errors_and_ktests_from_dir(pkrd);
       for (auto& nt : newtests) {
         errlist.push_back(nt);
       }
+    }
+
+    // From explicitly named error files
+    for (auto& eftp : ErrorFileToPrepend) {
+      errlist.push_back(std::make_pair(eftp, corresponding_ktest(eftp)));
+    }
+
+    llvm::outs() << "Hello world!" << '\n';
+    llvm::outs() << errlist.size() << '\n';
+    for (auto& ps : errlist) {
+      llvm::outs() << ps.first << " - " << ps.second << '\n';
     }
 
     // Create the switch statement to fork for each prepended error
