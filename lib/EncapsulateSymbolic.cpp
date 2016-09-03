@@ -85,6 +85,10 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
     // For all arguments of the function we want to encapsulate
     for (auto& argument : toencapsulate->getArgumentList()) {
+      llvm::StringRef argname = (argument.hasName())
+                                    ? argument.getValueName()->first()
+                                    : "macke_noname";
+
       if (argument.getType()->isPointerTy()) {
         // Pointers are handled differently
         // We allocate different sizes of memory and make it symbolic directly
@@ -93,9 +97,8 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         llvm::Instruction* rangecall = builder.CreateCall(
             kleerange, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
                            builder.getInt32(1), builder.getInt32(1025),
-                           builder.CreateGlobalStringPtr(
-                               "macke_sizeof_" +
-                               argument.getValueName()->first().str())}});
+                           builder.CreateGlobalStringPtr("macke_sizeof_" +
+                                                         argname.str())}});
 
         // int thisrange = macke_fork_several_sizes(rangecall)
         llvm::Instruction* thisrange =
@@ -117,15 +120,14 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         builder.CreateCall(
             kleemakesym,
             llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
-                malloc, memsize, builder.CreateGlobalStringPtr(
-                                     argument.getValueName()->first())}});
+                malloc, memsize, builder.CreateGlobalStringPtr(argname)}});
 
         newargs.push_back(builder.CreateBitCast(malloc, argument.getType()));
 
       } else {
         // Allocate new storage
-        llvm::AllocaInst* alloc = builder.CreateAlloca(
-            argument.getType(), 0, argument.getValueName()->first());
+        llvm::AllocaInst* alloc =
+            builder.CreateAlloca(argument.getType(), 0, argname);
 
         // Add a call to make_klee_symbolic for the new variable
         builder.CreateCall(
@@ -135,8 +137,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
                                       builder.getInt8Ty()->getPointerTo()),
                 getInt(datalayout.getTypeAllocSize(argument.getType()), &M,
                        &builder),
-                builder.CreateGlobalStringPtr(
-                    argument.getValueName()->first())}});
+                builder.CreateGlobalStringPtr(argname)}});
 
         // And store a load of the variable for latter call
         newargs.push_back(builder.CreateLoad(alloc));
