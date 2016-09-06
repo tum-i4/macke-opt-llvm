@@ -83,6 +83,7 @@ struct PrependError : public llvm::ModulePass {
     llvm::Function* kleereporterror = declare_klee_report_error(&M);
     llvm::Function* kleesilentexit = declare_klee_silent_exit(&M);
     llvm::Function* kleegetobjsize = declare_klee_get_obj_size(&M);
+    llvm::Function* kleewarningonce = declare_klee_warning_once(&M);
 
     // Create the function to be prepended
     llvm::Function* prependedFunc = llvm::Function::Create(
@@ -110,6 +111,11 @@ struct PrependError : public llvm::ModulePass {
     llvm::BasicBlock* block =
         llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
     llvm::IRBuilder<> builder(block);
+
+    // Report, that we have reached this error summary
+    // Remark: Reporting this as a warning is weired, but the is no klee_notice
+    builder.CreateCall(kleewarningonce, builder.CreateGlobalStringPtr(
+                     "MACKE: Summery for " + backgroundFunc->getName().str() + " reached"));
 
     // Build symbolic variable to fork later
     llvm::Instruction* symswitchvar = builder.CreateCall(
@@ -154,12 +160,6 @@ struct PrependError : public llvm::ModulePass {
     // From explicitly named error files
     for (auto& eftp : ErrorFileToPrepend) {
       errlist.push_back(std::make_pair(eftp, corresponding_ktest(eftp)));
-    }
-
-    llvm::outs() << "Hello world!" << '\n';
-    llvm::outs() << errlist.size() << '\n';
-    for (auto& ps : errlist) {
-      llvm::outs() << ps.first << " - " << ps.second << '\n';
     }
 
     // Create the switch statement to fork for each prepended error

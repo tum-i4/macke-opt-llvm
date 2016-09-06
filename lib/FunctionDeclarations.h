@@ -13,5 +13,7 @@ llvm::Function* declare_memcmp(llvm::Module* Mod);
 llvm::Function* declare_klee_silent_exit(llvm::Module* Mod);
 llvm::Function* declare_klee_report_error(llvm::Module* Mod);
 llvm::Function* declare_klee_get_obj_size(llvm::Module* Mod);
+llvm::Function* declare_klee_warning(llvm::Module* Mod);
+llvm::Function* declare_klee_warning_once(llvm::Module* Mod);
 
 #endif  // LIB_FUNCTIONDECLARATIONS_H_
