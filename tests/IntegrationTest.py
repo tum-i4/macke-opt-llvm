@@ -180,3 +180,8 @@ class TestIntegration(unittest.TestCase):
     @unittest.skipIf(skipworking, "works")
     def test_two_pointers(self):
         self.batch_run("bin/assertions.bc", "twopointers", 1, [b"'B"])
+
+    @unittest.skipIf(skipworking, "works")
+    def test_multiintarray(self):
+        self.batch_run("bin/assertions.bc", "multiintarray", 4, [
+            b"'\\x10\\x00\\x11\\x00\\x12\\x00\\x13\\x00"])

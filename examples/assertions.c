@@ -2,6 +2,7 @@
 // see https://en.wikipedia.org/wiki/C_data_types
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
 
 
@@ -84,4 +85,8 @@ void compareintscomplex(int a, int b) {
 
 void twopointers(unsigned char *a, unsigned char *b) {
   assert(!(a[0] == 'A' && b[0] == 'B'));
+}
+
+void multiintarray(uint16_t *v) {
+  assert(!(v[0] == 16 && v[1] == 17 && v[2] == 18 && v[3] == 19));
 }
