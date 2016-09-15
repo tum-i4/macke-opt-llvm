@@ -72,8 +72,8 @@ struct ExtractLinesOfCode : public llvm::ModulePass {
       llvm::outs() << '"' << rit.first << '"' << ':';
 
       bool fitfirst = true;
+      llvm::outs() << '{';
       for (auto &fit : rit.second) {
-        llvm::outs() << '{';
         if (!fitfirst) {
           llvm::outs() << ',';
         } else {
@@ -90,8 +90,9 @@ struct ExtractLinesOfCode : public llvm::ModulePass {
           }
           llvm::outs() << lit;
         }
-        llvm::outs() << ']' << '}';
+        llvm::outs() << ']';
       }
+      llvm::outs() << '}';
     }
     llvm::outs() << '}' << '\n';
 
