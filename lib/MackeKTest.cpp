@@ -14,6 +14,11 @@ MackeKTest::MackeKTest(const char* ktestfile) {
   // Read test from file into primitive klee struct
   KTest* ktest = kTest_fromFile(ktestfile);
 
+  if (!ktest) {
+    // nullptr => something is wrong with the ktest file
+    return;
+  }
+
   // Read the list of objects
   for (int i = 0; i < ktest->numObjects; i++) {
     std::vector<unsigned char> payload{};
