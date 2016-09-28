@@ -114,8 +114,10 @@ struct PrependError : public llvm::ModulePass {
 
     // Report, that we have reached this error summary
     // Remark: Reporting this as a warning is weired, but the is no klee_notice
-    builder.CreateCall(kleewarningonce, builder.CreateGlobalStringPtr(
-                     "MACKE: Summery for " + backgroundFunc->getName().str() + " reached"));
+    builder.CreateCall(kleewarningonce,
+                       builder.CreateGlobalStringPtr(
+                           "MACKE: Summery for " +
+                           backgroundFunc->getName().str() + " reached"));
 
     // Build symbolic variable to fork later
     llvm::Instruction* symswitchvar = builder.CreateCall(

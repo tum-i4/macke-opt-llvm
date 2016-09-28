@@ -124,16 +124,16 @@ llvm::Function* declare_klee_silent_exit(llvm::Module* Mod) {
 // 64: "declare void @klee_warning(i8*)"
 // 32: "declare void @klee_warning(i8*)"
 llvm::Function* declare_klee_warning(llvm::Module* Mod) {
-  return declare_generic(
-      Mod, "klee_warning", llvm::Type::getVoidTy(Mod->getContext()),
-      {llvm::Type::getInt8PtrTy(Mod->getContext())});
+  return declare_generic(Mod, "klee_warning",
+                         llvm::Type::getVoidTy(Mod->getContext()),
+                         {llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
 
 // Add:
 // 64: "declare void @klee_warning_once(i8*)"
 // 32: "declare void @klee_warning_once(i8*)"
 llvm::Function* declare_klee_warning_once(llvm::Module* Mod) {
-  return declare_generic(
-      Mod, "klee_warning_once", llvm::Type::getVoidTy(Mod->getContext()),
-      {llvm::Type::getInt8PtrTy(Mod->getContext())});
+  return declare_generic(Mod, "klee_warning_once",
+                         llvm::Type::getVoidTy(Mod->getContext()),
+                         {llvm::Type::getInt8PtrTy(Mod->getContext())});
 }
