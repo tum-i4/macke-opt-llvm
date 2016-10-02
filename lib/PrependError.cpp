@@ -195,7 +195,9 @@ struct PrependError : public llvm::ModulePass {
         //  stdin, stdin-stat from posix environment
         if (kobj.name.substr(0, 6) != "macke_" &&
             kobj.name != "model_version" && kobj.name != "A-data" &&
-            kobj.name != "A-data-stat" && kobj.name != "stdin" &&
+            kobj.name != "A-data-stat" && kobj.name != "B-data" &&
+            kobj.name != "B-data-stat" && kobj.name != "C-data" &&
+            kobj.name != "C-data-stat" && kobj.name != "stdin" &&
             kobj.name != "stdin-stat" && kobj.name != "macke_noname") {
           // Search for a matching variable in the function
           auto search = variablemap.find(kobj.name);
