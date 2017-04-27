@@ -37,6 +37,7 @@ bin/libMackeOpt.so: \
 		bin/Arch64or32bit.o \
 		bin/ChangeEntryPoint.o \
 		bin/DirectoryHelper.o \
+		bin/DotInternalCallgraph.o \
 		bin/EncapsulateSymbolic.o \
 		bin/ExtractCallgraph.o \
 		bin/ExtractLinesOfCode.o \
