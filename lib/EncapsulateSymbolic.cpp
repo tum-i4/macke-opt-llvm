@@ -54,8 +54,11 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     llvm::Function* kleemakesym = declare_klee_make_symbolic(&M);
     llvm::Function* mymalloc = declare_malloc(&M);
     llvm::Function* myfree = declare_free(&M);
+    llvm::Function* mymemcmp = declare_memcmp(&M);
     llvm::Function* mackeforksizes = define_macke_fork_several_sizes(&M);
     llvm::Function* kleerange = declare_klee_range(&M);
+    llvm::Function* kleesilentexit = declare_klee_silent_exit(&M);
+    llvm::Function* kleegetobjsize = declare_klee_get_obj_size(&M);
 
     // Create the encapsulation
 
@@ -75,7 +78,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     newmain->addFnAttr(llvm::Attribute::NoInline);
     newmain->addFnAttr(llvm::Attribute::OptimizeNone);
 
-    // Create two new basic blocks inside the new main
+    // Create a new basic block inside the new main
     llvm::BasicBlock* block =
         llvm::BasicBlock::Create(M.getContext(), "", newmain);
     llvm::IRBuilder<> builder(block);
@@ -145,15 +148,72 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
     }
 
     // Call our encapsulated function with the newly generated arguments
-    builder.CreateCall(toencapsulate, llvm::ArrayRef<llvm::Value*>(newargs));
+    llvm::Value* encret = builder.CreateCall(
+        toencapsulate, llvm::ArrayRef<llvm::Value*>(newargs));
+
+    // Create two blocks for result processing
+    llvm::BasicBlock* blockSilent =
+        llvm::BasicBlock::Create(M.getContext(), "", newmain);
+    llvm::IRBuilder<> builderSilent(blockSilent);
+    builderSilent.CreateCall(kleesilentexit, llvm::ArrayRef<llvm::Value*>(
+                                                 builderSilent.getInt32(0)));
+    builderSilent.CreateUnreachable();
+
+    llvm::BasicBlock* blockReturn =
+        llvm::BasicBlock::Create(M.getContext(), "", newmain);
+    llvm::IRBuilder<> builderReturn(blockReturn);
+
+    // Prepare some space for the result
+    llvm::Type* encrettype = toencapsulate->getReturnType();
+    if (encrettype->isVoidTy()) {
+      builder.CreateBr(blockReturn);
+    } else if (encrettype->isPointerTy()) {
+      llvm::Value* rsize = builder.CreateCall(
+          kleegetobjsize, llvm::ArrayRef<llvm::Value*>(builder.CreateBitCast(
+                              encret, builder.getInt8Ty()->getPointerTo())));
+
+      llvm::Instruction* check = builder.CreateCall(mymalloc, rsize);
+      mallocs.push_back(check);
+
+      builder.CreateCall(
+          kleemakesym,
+          llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+              builder.CreateBitCast(check, builder.getInt8Ty()->getPointerTo()),
+              rsize, builder.CreateGlobalStringPtr("macke_result")}});
+
+      llvm::Value* rescheck = builder.CreateICmpEQ(
+          builder.CreateCall(
+              mymemcmp, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+                            builder.CreateBitCast(
+                                encret, builder.getInt8Ty()->getPointerTo()),
+                            check, rsize}}),
+          builder.getInt32(0));
+
+      builder.CreateCondBr(rescheck, blockReturn, blockSilent);
+    } else {
+      // Non Pointer values
+      llvm::AllocaInst* allocR =
+          builder.CreateAlloca(encrettype, 0, "macke_result");
+      builder.CreateCall(
+          kleemakesym,
+          llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
+              builder.CreateBitCast(allocR,
+                                    builder.getInt8Ty()->getPointerTo()),
+              getInt(datalayout.getTypeAllocSize(encrettype), &M, &builder),
+              builder.CreateGlobalStringPtr("macke_result")}});
+
+      // Assign the returned value to the result symbolic value
+      llvm::Value* rescheck =
+          builder.CreateICmpEQ(encret, builder.CreateLoad(allocR));
+      builder.CreateCondBr(rescheck, blockReturn, blockSilent);
+    }
 
     // Free all previous malloc
     for (auto& malloc : mallocs) {
-      builder.CreateCall(myfree, malloc);
+      builderReturn.CreateCall(myfree, malloc);
     }
-
     // The new main returns always zero
-    builder.CreateRet(builder.getInt32(0));
+    builderReturn.CreateRet(builder.getInt32(0));
 
     return true;  // This module was modified
   }
