@@ -152,7 +152,9 @@ class TestIntegration(unittest.TestCase):
                 [b"'\\x15\\x00\\x00\\x00\\xff\\xff\\xff\\xff",
                  b"'\\x15\\x00\\x00\\x00\\x00\\x00\\x00\\x00"],
                 [b"'\\x00\\x00\\x00\\x00h\\x00\\x00\\x00",
-                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00"]
+                 b"'\\x00\\x00\\x00\\x00h\\xff\\xff\\xff",
+                 b"'\\x16\\x01\\x01\\x01h\\x00\\x00\\x00",
+                 b"'\\x16\\x01\\x01\\x01h\\xff\\xff\\xff"]
             ])
 
     @unittest.skipIf(skipworking, "works")
