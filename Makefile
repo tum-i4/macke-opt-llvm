@@ -1,5 +1,5 @@
 # These are the only three external values to be set
-LLVM_SRC_PATH ?= $$HOME/build/llvm
+LLVM_SRC_PATH ?= $$HOME/build/llvm/
 KLEE_BUILDDIR ?= $$HOME/build/klee/Release+Asserts
 KLEE_INCLUDES ?= $$HOME/build/klee/include/
 
@@ -46,7 +46,8 @@ bin/libMackeOpt.so: \
 		bin/ListAllFunctions.o \
 		bin/ListAllFuncsTopologic.o \
 		bin/MackeKTest.o \
-		bin/PrependError.o
+		bin/PrependError.o \
+		bin/FunctionInternalAttributes.o
 	$(CXX) -std=c++11 $(CXXFLAGS_LLVM) -shared $(LLVM_CONFIG_COMMAND) $^ -o $@ -L$(KLEE_LIB_PATH) -lkleeBasic
 
 
