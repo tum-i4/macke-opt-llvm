@@ -67,10 +67,12 @@ struct ListAllFuncsTopologic : public llvm::CallGraphSCCPass {
 
   bool doInitialization(llvm::Module &M) {
     // Strange, but avoids warnings about hidden functions
+    return false;
   }
 
   bool doFinalization(llvm::Module &M) {
     // Strange, but avoids warnings about hidden functions
+    return false;
   }
 
   bool doInitialization(llvm::CallGraph &CG) override {

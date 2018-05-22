@@ -57,6 +57,7 @@ struct ExtractLinesOfCode : public llvm::ModulePass {
         result[function.getName()] = resultnode;
       }
     }
+    return false;
   }
 
   bool doFinalization(llvm::Module &M) {

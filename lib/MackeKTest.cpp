@@ -45,4 +45,5 @@ std::ostream& operator<<(std::ostream& os, const MackeKTest& mackektest) {
     }
     os << std::endl;
   }
+  return os;
 }
