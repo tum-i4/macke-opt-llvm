@@ -28,6 +28,29 @@ static llvm::cl::list<std::string> ErrorFileToPrepend(
     "errorfiletoprepend",
     llvm::cl::desc("klee .err file, that should be prepended"));
 
+bool IsValidKTest(const std::unordered_map<std::string, llvm::Value*>& variablemap, const MackeKTest& ktest)
+{
+  // For each variable defined in the ktest objecct
+  for (auto& kobj : ktest.objects) {
+    // Ignore all variables starting with MACKE and
+    //  model_version, A-data, A-data-stat,
+    //  stdin, stdin-stat from posix environment
+    if (kobj.name.substr(0, 6) != "macke_" &&
+      kobj.name != "model_version" && kobj.name != "A-data" &&
+      kobj.name != "A-data-stat" && kobj.name != "B-data" &&
+      kobj.name != "B-data-stat" && kobj.name != "C-data" &&
+      kobj.name != "C-data-stat" && kobj.name != "stdin" &&
+      kobj.name != "stdin-stat" && kobj.name != "macke_noname") {
+    // Search for a matching variable in the function
+    auto search = variablemap.find(kobj.name);
+    if (search == variablemap.end())
+      return false;
+    }
+  }
+
+  return true;
+}
+
 struct PrependError : public llvm::ModulePass {
   static char ID;  // uninitialized ID is needed for pass registration
 
@@ -171,6 +194,11 @@ struct PrependError : public llvm::ModulePass {
     // One branch statement for each ktest file
     uint counter = 1;
     for (auto& errfile : errlist) {
+      // Load the date from the corresponding ktest file
+      MackeKTest ktest = MackeKTest(errfile.second.c_str());
+      if (!IsValidKTest(variablemap, ktest))
+        llvm::errs() << "Warning: ktestfile '" + errfile.second + "' contains invalid variables\n";
+        continue;
       llvm::BasicBlock* caseblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> casebuilder(caseblock);
@@ -185,8 +213,6 @@ struct PrependError : public llvm::ModulePass {
       // The value for checking, if the content does match
       llvm::Value* correctcontent = casebuilder.getTrue();
 
-      // Load the date from the corresponding ktest file
-      MackeKTest ktest = MackeKTest(errfile.second.c_str());
 
       // For each variable defined in the ktest objecct
       for (auto& kobj : ktest.objects) {
