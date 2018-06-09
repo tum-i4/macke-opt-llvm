@@ -104,11 +104,16 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
         llvm::Instruction* thisrange =
             builder.CreateCall(mackeforksizes, rangecall);
 
+        size_t typeSize = datalayout.getTypeAllocSize(
+            argument.getType()->getPointerElementType());
+
+        // Void type is zero, but we treat void* as char* arrays, thus typeSize is 1
+        if(typeSize == 0)
+          typeSize = 1;
+
         // Calculate the size, that should be allocated
         llvm::Value* memsize = builder.CreateMul(
-            thisrange, getInt(datalayout.getTypeAllocSize(
-                                  argument.getType()->getPointerElementType()),
-                              &M, &builder));
+            thisrange, getInt(typeSize, &M, &builder));
 
         // Allocate new storage
         llvm::Instruction* malloc = builder.CreateCall(mymalloc, memsize);
