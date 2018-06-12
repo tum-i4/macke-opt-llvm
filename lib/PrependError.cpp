@@ -197,8 +197,10 @@ struct PrependError : public llvm::ModulePass {
       // Load the date from the corresponding ktest file
       MackeKTest ktest = MackeKTest(errfile.second.c_str());
       if (!IsValidKTest(variablemap, ktest))
+      {
         llvm::errs() << "Warning: ktestfile '" + errfile.second + "' contains invalid variables\n";
         continue;
+      }
       llvm::BasicBlock* caseblock =
           llvm::BasicBlock::Create(M.getContext(), "", prependedFunc);
       llvm::IRBuilder<> casebuilder(caseblock);
