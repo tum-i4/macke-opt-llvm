@@ -16,8 +16,10 @@ MackeKTest::MackeKTest(const char* ktestfile) {
 
   if (!ktest) {
     // nullptr => something is wrong with the ktest file
+    hadError = true;
     return;
   }
+  hadError = false;
 
   // Read the list of objects
   for (int i = 0; i < ktest->numObjects; i++) {
@@ -36,6 +38,12 @@ MackeKTest::MackeKTest(const char* ktestfile) {
 
 
 std::ostream& operator<<(std::ostream& os, const MackeKTest& mackektest) {
+  // I
+  if (mackektest.hadError)
+  {
+    os << "Erroneous ktest file\n";
+    return os;
+  }
   for (auto& elem : mackektest.objects) {
     os << " " << elem.name << " = ";
 

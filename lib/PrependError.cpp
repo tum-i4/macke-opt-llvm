@@ -30,7 +30,8 @@ static llvm::cl::list<std::string> ErrorFileToPrepend(
 
 bool IsValidKTest(const std::unordered_map<std::string, llvm::Value*>& variablemap, const MackeKTest& ktest)
 {
-  size_t countObjs = 0;
+  if (ktest.hadError)
+    return false;
   // For each variable defined in the ktest objecct
   for (auto& kobj : ktest.objects) {
     // Ignore all variables starting with MACKE and
@@ -47,11 +48,10 @@ bool IsValidKTest(const std::unordered_map<std::string, llvm::Value*>& variablem
     if (search == variablemap.end())
       return false;
     }
-    countObjs++;
   }
 
   /* Remove false positives that occurred because the object was empty */
-  return countObjs > 0;
+  return true;
 }
 
 struct PrependError : public llvm::ModulePass {

@@ -20,6 +20,7 @@ class MackeKTest {
                                   const MackeKTest& mackektest);
 
  public:
+  bool hadError;
   std::vector<MackeKTestObject> objects;
 
   explicit MackeKTest(const char* ktestfile);
