@@ -30,6 +30,7 @@ static llvm::cl::list<std::string> ErrorFileToPrepend(
 
 bool IsValidKTest(const std::unordered_map<std::string, llvm::Value*>& variablemap, const MackeKTest& ktest)
 {
+  size_t countObjs = 0;
   // For each variable defined in the ktest objecct
   for (auto& kobj : ktest.objects) {
     // Ignore all variables starting with MACKE and
@@ -46,9 +47,11 @@ bool IsValidKTest(const std::unordered_map<std::string, llvm::Value*>& variablem
     if (search == variablemap.end())
       return false;
     }
+    countObjs++;
   }
 
-  return true;
+  /* Remove false positives that occurred because the object was empty */
+  return countObjs > 0;
 }
 
 struct PrependError : public llvm::ModulePass {
@@ -198,7 +201,8 @@ struct PrependError : public llvm::ModulePass {
       MackeKTest ktest = MackeKTest(errfile.second.c_str());
       if (!IsValidKTest(variablemap, ktest))
       {
-        llvm::errs() << "Warning: ktestfile '" + errfile.second + "' contains invalid variables\n";
+        // Print ktest for debugging purposes
+        // llvm::errs() << "KTest '" << errfile.second << "' is invalid.\n";
         continue;
       }
       llvm::BasicBlock* caseblock =
@@ -214,7 +218,6 @@ struct PrependError : public llvm::ModulePass {
       llvm::Value* correctsize = casebuilder.getTrue();
       // The value for checking, if the content does match
       llvm::Value* correctcontent = casebuilder.getTrue();
-
 
       // For each variable defined in the ktest objecct
       for (auto& kobj : ktest.objects) {
