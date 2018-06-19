@@ -89,6 +89,14 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
                                     ? argument.getValueName()->first()
                                     : "macke_noname";
 
+      // Do not make sret arguments symbolic and instead only allocate memory
+      if(argument.hasStructRetAttr()) {
+         assert(argument.getType()->isPointerTy());
+         // Allocate new storage
+         newargs.push_back(builder.CreateAlloca(argument.getType()->getPointerElementType(), 0, argname));
+         continue;
+      }
+
       if (argument.getType()->isPointerTy()) {
         // Pointers are handled differently
         // We allocate different sizes of memory and make it symbolic directly
