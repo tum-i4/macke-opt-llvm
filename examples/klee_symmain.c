@@ -8,7 +8,7 @@ void faulty(int a) {
 }
 
 int main() {
-  int a = klee_int("a");
+  int a = klee_int("argno0");
   faulty(a);
   return 0;
 }

@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include "Arch64or32bit.h"
+#include "Compat.h"
 #include "FunctionDeclarations.h"
 #include "FunctionDefinitions.h"
 #include "llvm/ADT/SmallVector.h"
@@ -85,9 +86,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
 
     // For all arguments of the function we want to encapsulate
     for (auto& argument : toencapsulate->getArgumentList()) {
-      llvm::StringRef argname = (argument.hasName())
-                                    ? argument.getValueName()->first()
-                                    : "macke_noname";
+      std::string argname = getArgumentName(&M, &argument);
 
       // Do not make sret arguments symbolic and instead only allocate memory
       if(argument.hasStructRetAttr()) {
@@ -106,7 +105,7 @@ struct EncapsulateSymbolic : public llvm::ModulePass {
             kleerange, llvm::ArrayRef<llvm::Value*>{std::vector<llvm::Value*>{
                            builder.getInt32(1), builder.getInt32(1025),
                            builder.CreateGlobalStringPtr("macke_sizeof_" +
-                                                         argname.str())}});
+                                                         argname)}});
 
         // int thisrange = macke_fork_several_sizes(rangecall)
         llvm::Instruction* thisrange =

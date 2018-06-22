@@ -5,6 +5,7 @@
 #include <vector>
 #include "Arch64or32bit.h"
 #include "DirectoryHelper.h"
+#include "Compat.h"
 #include "FunctionDeclarations.h"
 #include "MackeKTest.h"
 #include "llvm/IR/Function.h"
@@ -120,7 +121,7 @@ struct PrependError : public llvm::ModulePass {
     auto oldarg = backgroundFunc->arg_begin();
     std::unordered_map<std::string, llvm::Value*> variablemap;
     for (auto& newarg : prependedFunc->getArgumentList()) {
-      auto oldname = llvm::cast<llvm::Value>(oldarg)->getName();
+      auto oldname = getArgumentName(&M, oldarg);
       newarg.setName(oldname);
       variablemap[oldname] = &newarg;
       ++oldarg;
